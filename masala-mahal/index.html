@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover"
+    />
+
+    <title>Masala Mahal – Indian Food Quiz</title>
+
+    <meta name="description" content="🪔 Masala Mahal – Guess iconic Indian dishes from clues, earn points & climb the leaderboard!" />
+    <meta name="keywords" content="indian food quiz, masala mahal, indian dishes, food game, south indian" />
+    <meta name="author" content="Indian Studies" />
+    <meta name="theme-color" content="#4A0F0F" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Masala Mahal" />
+
+    <meta property="og:type"        content="website" />
+    <meta property="og:title"       content="🪔 Masala Mahal – Indian Food Quiz" />
+    <meta property="og:description" content="Guess iconic Indian dishes from clues, earn points & climb the leaderboard!" />
+    <meta property="og:image"       content="/android-chrome-512x512.png" />
+
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       content="🪔 Masala Mahal – Indian Food Quiz" />
+    <meta name="twitter:description" content="Guess iconic Indian dishes from clues, earn points & climb the leaderboard!" />
+    <meta name="twitter:image"       content="/android-chrome-512x512.png" />
+
+    <!-- Favicons using your ACTUAL filenames -->
+    <link rel="icon"             type="image/x-icon"                href="/favicon.ico" />
+    <link rel="icon"             type="image/png" sizes="32x32"     href="/favicon-32x32.png" />
+    <link rel="icon"             type="image/png" sizes="16x16"     href="/favicon-16x16.png" />
+    <link rel="icon"             type="image/png" sizes="192x192"   href="/android-chrome-192x192.png" />
+    <link rel="icon"             type="image/png" sizes="512x512"   href="/android-chrome-512x512.png" />
+    <link rel="apple-touch-icon" sizes="180x180"                    href="/apple-touch-icon.png" />
+    <link rel="apple-touch-startup-image"                           href="/android-chrome-512x512.png" />
+    <link rel="manifest"                                            href="/manifest.json" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Lora', Georgia, serif;
+        background-color: #FDF3E3;
+        background-image:
+          radial-gradient(ellipse 110% 90% at 50% 0%, rgba(232,133,10,0.09) 0%, transparent 60%),
+          linear-gradient(160deg, #fdf3e3 0%, #f9edd5 50%, #fdf3e3 100%);
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        overflow-x: hidden;
+      }
+
+      #root {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        position: relative;
+      }
+
+      #loading-splash {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(160deg, #4A0F0F 0%, #6B1A1A 55%, #8C2424 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        gap: 20px;
+        transition: opacity 0.4s ease;
+      }
+
+      #loading-splash::before {
+        content: '';
+        position: absolute;
+        width: min(320px, 80vw);
+        height: min(320px, 80vw);
+        border-radius: 50%;
+        background: repeating-conic-gradient(
+          from 0deg at 50% 50%,
+          rgba(201,148,42,0.12) 0deg 20deg,
+          transparent 20deg 40deg
+        );
+        animation: rotateSlow 20s linear infinite;
+      }
+
+      @keyframes rotateSlow { to { transform: rotate(360deg); } }
+
+      .splash-diya {
+        font-size: clamp(3.5rem, 12vw, 5rem);
+        animation: diGlow 2s ease-in-out infinite alternate;
+        position: relative;
+        z-index: 1;
+      }
+
+      @keyframes diGlow {
+        from { filter: drop-shadow(0 0 10px rgba(232,133,10,0.5)); transform: scale(1); }
+        to   { filter: drop-shadow(0 0 28px rgba(245,217,139,0.8)); transform: scale(1.06); }
+      }
+
+      .splash-title {
+        font-family: Georgia, serif;
+        font-size: clamp(1.8rem, 6vw, 2.8rem);
+        font-weight: 700;
+        color: #F5D98B;
+        letter-spacing: 0.06em;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 0 20px;
+      }
+
+      .splash-subtitle {
+        font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+        font-weight: 600;
+        color: rgba(221,195,125,0.65);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        font-family: sans-serif;
+      }
+
+      .splash-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(245,217,139,0.2);
+        border-top-color: #F5D98B;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        position: relative;
+        z-index: 1;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .splash-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: min(200px, 60vw);
+        position: relative;
+        z-index: 1;
+      }
+
+      .splash-divider-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(201,148,42,0.6), transparent);
+      }
+
+      .splash-divider-icon { color: #C9942A; font-size: 0.9rem; }
+    </style>
+  </head>
+
+  <body>
+    <div id="loading-splash" aria-hidden="true">
+      <div class="splash-diya">🪔</div>
+      <div class="splash-title">Masala Mahal</div>
+      <div class="splash-divider">
+        <span class="splash-divider-line"></span>
+        <span class="splash-divider-icon">✦</span>
+        <span class="splash-divider-line"></span>
+      </div>
+      <div class="splash-subtitle">Indian Food Quiz</div>
+      <div class="splash-spinner"></div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+
+    <script>
+      (function () {
+        function hideSplash() {
+          var el = document.getElementById('loading-splash');
+          if (!el) return;
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+          setTimeout(function () { if (el) el.remove(); }, 420);
+        }
+        var fallback = setTimeout(hideSplash, 4000);
+        window.addEventListener('load', function () {
+          clearTimeout(fallback);
+          setTimeout(hideSplash, 200);
+        });
+      })();
+    </script>
+  </body>
+</html>
