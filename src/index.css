@@ -1,6 +1,31 @@
 /* src/index.css - Main stylesheet entry point */
 @import './App.css';
 
+/* Mobile PWA fixes */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  #root {
+    height: 100%;
+    height: -webkit-fill-available;
+    min-height: 100%;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Hide splash immediately if React fails to load */
+#loading-splash {
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Global resets & base styles */
 * {
   margin: 0;
