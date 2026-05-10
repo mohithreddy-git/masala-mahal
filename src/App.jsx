@@ -3,6 +3,7 @@ import "./App.css";
 
 const ADMIN_PASSWORD = "IndianStudies";
 const REFRESH_PASSWORD = "refresh123";
+const TOTAL_QUESTIONS = 10;
 
 const foods = [
   { name: "Idli", clues: ["Soft, white steamed cakes made from rice batter", "Healthy South Indian breakfast served with sambar", "Round, spongy, and always eaten with chutney"] },
@@ -43,52 +44,75 @@ const SCREEN = {
   LOGIN: "login",
   USERNAME: "username",
   GAME: "game",
+  GAME_OVER: "game_over",
   LEADERBOARD: "leaderboard",
 };
+
+function getRankLabel(rank) {
+  if (rank === 1) return "🥇 1st";
+  if (rank === 2) return "🥈 2nd";
+  if (rank === 3) return "🥉 3rd";
+  return `#${rank}`;
+}
+
+function getScoreMessage(score) {
+  const max = TOTAL_QUESTIONS * 25;
+  const pct = score / max;
+  if (pct >= 0.9) return { emoji: "🌟", text: "Outstanding! You're a true food expert!" };
+  if (pct >= 0.7) return { emoji: "🎉", text: "Great job! You really know your Indian food!" };
+  if (pct >= 0.5) return { emoji: "👍", text: "Good effort! Keep practicing!" };
+  return { emoji: "🍽️", text: "Better luck next time. Try again!" };
+}
 
 function useGame() {
   const [usedIndices, setUsedIndices] = useState([]);
   const [currentFood, setCurrentFood] = useState(null);
 
   const getNextFood = useCallback(() => {
-    const pool = usedIndices.length >= foods.length ? [] : usedIndices;
-    const available = foods.map((_, i) => i).filter((i) => !pool.includes(i));
-    const idx = available[Math.floor(Math.random() * available.length)];
-    setUsedIndices((prev) =>
-      prev.length >= foods.length ? [idx] : [...prev, idx]
-    );
-    setCurrentFood(foods[idx]);
-    return foods[idx];
-  }, [usedIndices]);
+    setUsedIndices((prev) => {
+      const pool = prev.length >= foods.length ? [] : prev;
+      const available = foods.map((_, i) => i).filter((i) => !pool.includes(i));
+      const idx = available[Math.floor(Math.random() * available.length)];
+      setCurrentFood(foods[idx]);
+      return pool.length === 0 ? [idx] : [...prev, idx];
+    });
+  }, []);
 
-  return { currentFood, getNextFood };
+  const resetGame = useCallback(() => {
+    setUsedIndices([]);
+    setCurrentFood(null);
+  }, []);
+
+  return { currentFood, getNextFood, resetGame };
 }
 
 export default function App() {
   const [screen, setScreen] = useState(SCREEN.ROLE_SELECT);
+  const [prevScreen, setPrevScreen] = useState(SCREEN.GAME);
   const [adminPass, setAdminPass] = useState("");
   const [username, setUsername] = useState("");
   const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
+  const [questionNum, setQuestionNum] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
   const [showResult, setShowResult] = useState(false);
   const [cluesShown, setCluesShown] = useState(0);
   const [leaderboard, setLeaderboard] = useState([]);
   const [shake, setShake] = useState(false);
   const [flash, setFlash] = useState(null);
-  const { currentFood, getNextFood } = useGame();
-
-  const startQuestion = () => {
-    getNextFood();
-    setUserAnswer("");
-    setShowResult(false);
-    setCluesShown(0);
-  };
+  const { currentFood, getNextFood, resetGame } = useGame();
 
   useEffect(() => {
     const saved = localStorage.getItem("masalaLeaderboard");
     if (saved) setLeaderboard(JSON.parse(saved));
   }, []);
+
+  const startQuestion = useCallback(() => {
+    getNextFood();
+    setUserAnswer("");
+    setShowResult(false);
+    setCluesShown(0);
+  }, [getNextFood]);
 
   const handleAdminLogin = () => {
     if (adminPass === ADMIN_PASSWORD) {
@@ -110,17 +134,26 @@ export default function App() {
     }
   };
 
-  const handleUsernameSubmit = () => {
-    if (!username.trim()) return;
+  const beginGame = () => {
+    setScore(0);
+    setQuestionNum(1);
+    setCorrectCount(0);
+    resetGame();
     setScreen(SCREEN.GAME);
+    setPrevScreen(SCREEN.GAME);
     setTimeout(startQuestion, 50);
   };
 
-  const saveToLeaderboard = (finalScore, finalLevel) => {
+  const handleUsernameSubmit = () => {
+    if (!username.trim()) return;
+    beginGame();
+  };
+
+  const persistLeaderboard = (finalScore, finalCorrect) => {
     const entry = {
       name: username,
       score: finalScore,
-      level: finalLevel,
+      correct: finalCorrect,
       date: new Date().toLocaleDateString("en-IN"),
     };
     const updated = [entry, ...leaderboard.filter((e) => e.name !== username)]
@@ -132,21 +165,41 @@ export default function App() {
 
   const handleSubmit = () => {
     if (!userAnswer.trim() || showResult) return;
-    const isCorrect =
+    const correct =
       userAnswer.trim().toLowerCase() === currentFood.name.toLowerCase();
     setShowResult(true);
-    if (isCorrect) {
+
+    let newScore = score;
+    let newCorrect = correctCount;
+
+    if (correct) {
       const pts = 25 - cluesShown * 5;
-      const newScore = score + pts;
-      const newLevel = level + 1;
+      newScore = score + pts;
+      newCorrect = correctCount + 1;
       setScore(newScore);
-      setLevel(newLevel);
+      setCorrectCount(newCorrect);
       setFlash("correct");
-      saveToLeaderboard(newScore, newLevel);
     } else {
       setFlash("wrong");
     }
     setTimeout(() => setFlash(null), 700);
+
+    // Save after every answer so leaderboard is always up to date
+    persistLeaderboard(newScore, newCorrect);
+  };
+
+  const handleNextQuestion = () => {
+    if (questionNum >= TOTAL_QUESTIONS) {
+      setPrevScreen(SCREEN.GAME_OVER);
+      setScreen(SCREEN.GAME_OVER);
+    } else {
+      setQuestionNum((q) => q + 1);
+      startQuestion();
+    }
+  };
+
+  const handlePlayAgain = () => {
+    beginGame();
   };
 
   const handleKeyDown = (e) => {
@@ -163,6 +216,9 @@ export default function App() {
     currentFood &&
     userAnswer.trim().toLowerCase() === currentFood.name.toLowerCase();
 
+  const myRank = leaderboard.findIndex((p) => p.name === username) + 1;
+  const scoreMsg = getScoreMessage(score);
+
   return (
     <div className={`app${flash ? ` flash-${flash}` : ""}`}>
 
@@ -170,7 +226,7 @@ export default function App() {
       {screen === SCREEN.ROLE_SELECT && (
         <div className="role-screen">
           <div className="role-header">
-            <div className="role-diya">🍲</div>
+            <div className="role-diya">🪔</div>
             <div className="role-brand">Masala Mahal</div>
             <div className="role-tagline">Indian Food Quiz</div>
             <div className="role-divider">
@@ -182,7 +238,6 @@ export default function App() {
           </div>
 
           <div className="role-cards">
-            {/* Player Card */}
             <button
               className="role-card role-card--player"
               onClick={() => setScreen(SCREEN.USERNAME)}
@@ -196,7 +251,6 @@ export default function App() {
               <div className="role-card-arrow">Play Now →</div>
             </button>
 
-            {/* Admin Card */}
             <button
               className="role-card role-card--admin"
               onClick={() => setScreen(SCREEN.LOGIN)}
@@ -294,10 +348,34 @@ export default function App() {
               <span>👤 {username}</span>
               <button
                 className="lb-btn"
-                onClick={() => setScreen(SCREEN.LEADERBOARD)}
+                onClick={() => { setPrevScreen(SCREEN.GAME); setScreen(SCREEN.LEADERBOARD); }}
               >
                 🏆 Leaderboard
               </button>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="progress-wrap">
+            <div className="progress-label">
+              <span>Question {questionNum} of {TOTAL_QUESTIONS}</span>
+              <span>{correctCount} correct so far</span>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${((questionNum - 1) / TOTAL_QUESTIONS) * 100}%` }}
+              />
+            </div>
+            <div className="progress-dots">
+              {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => (
+                <div
+                  key={i}
+                  className={`progress-dot${
+                    i < questionNum - 1 ? " done" : i === questionNum - 1 ? " active" : ""
+                  }`}
+                />
+              ))}
             </div>
           </div>
 
@@ -308,9 +386,9 @@ export default function App() {
               <div className="stat-lbl">Score</div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon">⭐</div>
-              <div className="stat-val">{level}</div>
-              <div className="stat-lbl">Level</div>
+              <div className="stat-icon">📋</div>
+              <div className="stat-val">{questionNum}/{TOTAL_QUESTIONS}</div>
+              <div className="stat-lbl">Question</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon">💡</div>
@@ -367,11 +445,7 @@ export default function App() {
               </button>
               <button
                 className={`clue-btn ${
-                  cluesShown >= 2
-                    ? "used"
-                    : cluesShown < 1
-                    ? "used"
-                    : "available"
+                  cluesShown >= 2 ? "used" : cluesShown < 1 ? "used" : "available"
                 }`}
                 onClick={() => showClue(2)}
                 disabled={cluesShown >= 2 || cluesShown < 1}
@@ -401,17 +475,69 @@ export default function App() {
                   <div className="pts-earned">+{pts} points earned!</div>
                 )}
               </div>
-              <button className="next-btn" onClick={startQuestion}>
-                Next Question ➡
+              <button className="next-btn" onClick={handleNextQuestion}>
+                {questionNum >= TOTAL_QUESTIONS ? "See Results 🏁" : `Next Question ➡ (${questionNum}/${TOTAL_QUESTIONS})`}
               </button>
             </>
           )}
         </div>
       )}
 
+      {/* ── GAME OVER ── */}
+      {screen === SCREEN.GAME_OVER && (
+        <div className="gameover-wrap">
+          <div className="gameover-card">
+            <div className="gameover-top">
+              <div className="gameover-emoji">{scoreMsg.emoji}</div>
+              <div className="gameover-title">Quiz Complete!</div>
+              <div className="gameover-subtitle">{scoreMsg.text}</div>
+            </div>
+
+            <div className="gameover-body">
+              <div className="gameover-player">Well played, <strong>{username}</strong>! 🎊</div>
+
+              <div className="gameover-stats">
+                <div className="go-stat">
+                  <div className="go-stat-val">{score}</div>
+                  <div className="go-stat-lbl">Final Score</div>
+                </div>
+                <div className="go-stat-divider" />
+                <div className="go-stat">
+                  <div className="go-stat-val">{correctCount}<span className="go-stat-of">/{TOTAL_QUESTIONS}</span></div>
+                  <div className="go-stat-lbl">Correct</div>
+                </div>
+                <div className="go-stat-divider" />
+                <div className="go-stat">
+                  <div className="go-stat-val go-stat-rank">{myRank ? getRankLabel(myRank) : "—"}</div>
+                  <div className="go-stat-lbl">Your Rank</div>
+                </div>
+              </div>
+
+              <div className="gameover-actions">
+                <button className="btn-primary" onClick={handlePlayAgain}>
+                  🔄 Play Again
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => { setPrevScreen(SCREEN.GAME_OVER); setScreen(SCREEN.LEADERBOARD); }}
+                >
+                  🏆 Leaderboard
+                </button>
+                <button
+                  className="btn-ghost"
+                  onClick={() => { setUsername(""); setScreen(SCREEN.ROLE_SELECT); }}
+                >
+                  🏠 Home
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── LEADERBOARD OVERLAY ── */}
       {screen === SCREEN.LEADERBOARD && (
-        <div className="overlay" onClick={() => setScreen(SCREEN.GAME)}>
+        <div className="overlay" onClick={() => setScreen(prevScreen)}>
           <div className="lb-card" onClick={(e) => e.stopPropagation()}>
             <div className="lb-head">
               <div
@@ -438,7 +564,7 @@ export default function App() {
                 </button>
                 <button
                   className="close-btn"
-                  onClick={() => setScreen(SCREEN.GAME)}
+                  onClick={() => setScreen(prevScreen)}
                 >
                   ✕
                 </button>
@@ -455,13 +581,7 @@ export default function App() {
                     className={`lb-row${p.name === username ? " me" : ""}`}
                   >
                     <span className={`lb-rank${i < 3 ? " top" : ""}`}>
-                      {i === 0
-                        ? "🥇"
-                        : i === 1
-                        ? "🥈"
-                        : i === 2
-                        ? "🥉"
-                        : `#${i + 1}`}
+                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                     </span>
                     <span className="lb-name">{p.name}</span>
                     <span className="lb-score">{p.score}</span>
@@ -472,10 +592,7 @@ export default function App() {
             </div>
 
             <div className="lb-foot">
-              Your rank :{" "}
-              <strong>
-                {leaderboard.findIndex((p) => p.name === username) + 1 || "—"}
-              </strong>
+              Your rank : <strong>{myRank || "—"}</strong>
               &nbsp;||&nbsp; Score : <strong>{score}</strong>
             </div>
           </div>
