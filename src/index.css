@@ -1,0 +1,65 @@
+/* src/index.css - Main stylesheet entry point */
+@import './App.css';
+
+/* Global resets & base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent layout shift */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid #E8850A;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Selection color */
+::selection {
+  background-color: #E8850A;
+  color: #FDF3E3;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(253, 243, 227, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9942A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E8850A;
+}
