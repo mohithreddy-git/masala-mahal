@@ -170,7 +170,7 @@ export default function App() {
       {screen === SCREEN.ROLE_SELECT && (
         <div className="role-screen">
           <div className="role-header">
-            <div className="role-diya">🪔</div>
+            <div className="role-diya">🍲</div>
             <div className="role-brand">Masala Mahal</div>
             <div className="role-tagline">Indian Food Quiz</div>
             <div className="role-divider">
