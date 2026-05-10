@@ -182,20 +182,47 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <script>
-      (function () {
-        function hideSplash() {
-          var el = document.getElementById('loading-splash');
-          if (!el) return;
-          el.style.opacity = '0';
-          el.style.pointerEvents = 'none';
-          setTimeout(function () { if (el) el.remove(); }, 420);
+  (function () {
+    let splashTimeout;
+    let isLoaded = false;
+    
+    function hideSplash() {
+      const el = document.getElementById('loading-splash');
+      if (!el) return;
+      
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if (el && el.parentNode) el.remove();
+      }, 400);
+    }
+    
+    // Hide splash after 4 seconds max (prevents infinite loading)
+    splashTimeout = setTimeout(hideSplash, 4000);
+    
+    // Hide when React loads
+    window.addEventListener('load', () => {
+      clearTimeout(splashTimeout);
+      setTimeout(hideSplash, 300);
+    });
+    
+    // Also hide when DOMContentLoaded (faster)
+    document.addEventListener('DOMContentLoaded', () => {
+      clearTimeout(splashTimeout);
+      setTimeout(hideSplash, 500);
+    });
+    
+    // Mobile PWA fix - hide on first interaction
+    ['click', 'touchstart', 'keydown'].forEach(event => {
+      document.addEventListener(event, () => {
+        if (!isLoaded) {
+          isLoaded = true;
+          clearTimeout(splashTimeout);
+          hideSplash();
         }
-        var fallback = setTimeout(hideSplash, 4000);
-        window.addEventListener('load', function () {
-          clearTimeout(fallback);
-          setTimeout(hideSplash, 200);
-        });
-      })();
-    </script>
+      }, { once: true });
+    });
+  })();
+</script>
   </body>
 </html>
