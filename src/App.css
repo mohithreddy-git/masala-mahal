@@ -89,7 +89,7 @@ body {
     radial-gradient(ellipse 110% 90% at 50% 0%, rgba(232,133,10,0.09) 0%, transparent 60%),
     radial-gradient(ellipse 110% 60% at 50% 100%, rgba(107,26,26,0.07) 0%, transparent 55%),
     linear-gradient(160deg, #fdf3e3 0%, #f9edd5 50%, #fdf3e3 100%);
-  background-attachment: fixed;
+  background-attachment: scroll;
   background-size: 600px 600px, 600px 600px, 600px 600px, 100% 100%, 100% 100%, 100% 100%;
   background-position: center;
   line-height: 1.6;
