@@ -239,7 +239,6 @@ export default function App() {
               value={adminPass}
               onChange={(e) => setAdminPass(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
-              autoFocus
             />
             <button className="btn-primary" onClick={handleAdminLogin}>
               Enter Game ✦
@@ -274,7 +273,6 @@ export default function App() {
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleUsernameSubmit()}
               maxLength={20}
-              autoFocus
             />
             <button
               className="btn-primary"
@@ -348,7 +346,6 @@ export default function App() {
               onChange={(e) => setUserAnswer(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={showResult}
-              autoFocus
             />
             <button
               className="submit-btn"
