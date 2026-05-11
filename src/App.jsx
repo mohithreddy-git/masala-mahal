@@ -16,7 +16,7 @@ const foods = [
   { name: "Gulab Jamun", clues: ["Sweet brown balls soaked in sugar syrup", "Soft, juicy dessert served at every wedding", "Often eaten warm with vanilla ice cream"] },
   { name: "Pani Puri", clues: ["Small crispy balls filled with spicy herb water", "You eat it in one bite at a street stall", "Also called Golgappa or Puchka"] },
   { name: "Chapati", clues: ["Flat, round bread made from wheat flour", "Daily staple food eaten with curry or dal", "Also known as Roti or Phulka"] },
-  { name: "Dal", clues: ["Yellow lentil soup tempered with spices", "Simple comfort food eaten with rice or roti", "Commonly called Pappu in Telugu"] },
+  { name: "Rasam", clues: ["Yellow lentil soup tempered with spices", "Simple comfort food eaten with rice or roti", "Commonly called Pappu in Telugu"] },
   { name: "Curd Rice", clues: ["Soft rice mixed with yogurt and salt", "Cooling meal that ends every South Indian lunch", "Best eaten with mango or lemon pickle"] },
   { name: "Omelette", clues: ["Beaten eggs fried in a pan with onions", "Quick protein-rich breakfast or side dish", "Often eaten with bread or as a street snack"] },
   { name: "Upma", clues: ["Savory porridge made from roasted semolina", "Quick breakfast dish with peanuts and veggies", "Commonly called Uppittu in some regions"] },
