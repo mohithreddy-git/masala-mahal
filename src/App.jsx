@@ -1,1640 +1,666 @@
+"use client";
+import { useState, useEffect, useCallback } from "react";
+import "./App.css";
 
-/*
- * ══════════════════════════════════════════════════════════════════
- *  MASALA MAHAL — Authentic Indian Traditional Food Quiz
- *  Colour Palette & Design Notes
- * ══════════════════════════════════════════════════════════════════
- *
- *  --maroon      #6B1A1A  → Deep temple-red; power, tradition, reverence
- *  --saffron     #E8850A  → Saffron robes & spice; warmth, celebration
- *  --gold        #C9942A  → Marigold garlands & gold leaf; festivity
- *  --gold-light  #F5D98B  → Turmeric-tinged highlights; soft luxury
- *  --mustard     #D4A017  → Mustard seed temper; earthy richness
- *  --emerald     #1A5C3A  → Curry-leaf green; freshness, nature
- *  --cream       #FDF3E3  → Raw cotton / basmati; clean, readable base
- *  --ink         #2A1505  → Darkest chai; legibility anchor
- * ══════════════════════════════════════════════════════════════════
- */
+const ADMIN_PASSWORD = "IndianStudies";
+const REFRESH_PASSWORD = "refresh123";
+const TOTAL_QUESTIONS = 10;
 
-/* ── Google Fonts ─────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Noto+Sans:wght@400;500;600&display=swap');
+const foods = [
+  { name: "Idli", clues: ["Soft, white steamed cakes made from rice batter", "Healthy South Indian breakfast served with sambar", "Round, spongy, and always eaten with chutney"] },
+  { name: "Dosa", clues: ["Thin, crispy golden crepe made from rice batter", "Famous South Indian dish shaped like a roll or cone", "Usually filled with potato masala inside"] },
+  { name: "Samosa", clues: ["Crispy triangular fried pastry with potato filling", "Most common snack found at every Indian tea stall", "Best enjoyed hot with green or sweet chutney"] },
+  { name: "Biryani", clues: ["Famous spicy rice dish cooked with meat or veg", "Known for its long grains and aromatic smell", "World-famous specialty of Hyderabad"] },
+  { name: "Puri", clues: ["Deep-fried wheat bread that puffs up like a ball", "Golden, round, and soft breakfast favorite", "Always served with potato curry or bhaji"] },
+  { name: "Vada", clues: ["Savory fried snack that looks like a donut", "Made from lentils and served with sambar", "Crispy on the outside, soft on the inside"] },
+  { name: "Maggi", clues: ["Quick 2-minute noodles loved by students", "The ultimate late-night snack for everyone", "Yellow noodles cooked with a special Masala"] },
+  { name: "Gulab Jamun", clues: ["Sweet brown balls soaked in sugar syrup", "Soft, juicy dessert served at every wedding", "Often eaten warm with vanilla ice cream"] },
+  { name: "Pani Puri", clues: ["Small crispy balls filled with spicy herb water", "You eat it in one bite at a street stall", "Also called Golgappa or Puchka"] },
+  { name: "Chapati", clues: ["Flat, round bread made from wheat flour", "Daily staple food eaten with curry or dal", "Also known as Roti or Phulka"] },
+  { name: "Dal", clues: ["Yellow lentil soup tempered with spices", "Simple comfort food eaten with rice or roti", "Commonly called Pappu in Telugu"] },
+  { name: "Curd Rice", clues: ["Soft rice mixed with yogurt and salt", "Cooling meal that ends every South Indian lunch", "Best eaten with mango or lemon pickle"] },
+  { name: "Omelette", clues: ["Beaten eggs fried in a pan with onions", "Quick protein-rich breakfast or side dish", "Often eaten with bread or as a street snack"] },
+  { name: "Upma", clues: ["Savory porridge made from roasted semolina", "Quick breakfast dish with peanuts and veggies", "Commonly called Uppittu in some regions"] },
+  { name: "Pakoda", clues: ["Deep-fried onion or vegetable fritters", "Best snack to eat when it is raining outside", "Crispy, salty, and perfect with tea"] },
+  { name: "Jalebi", clues: ["Orange-colored sweet spirals soaked in syrup", "Crispy, juicy, and shaped like a coil", "Traditional sweet sold at every local mela"] },
+  { name: "Tea", clues: ["Most popular hot drink in India made with milk", "Brewed with sugar, tea leaves, and ginger", "Commonly called Chai by everyone"] },
+  { name: "Pav Bhaji", clues: ["Mashed spicy veg curry served with buttered bread", "Famous Mumbai street food with lots of butter", "Served with chopped onions and a lemon slice"] },
+  { name: "Laddu", clues: ["Round sweet ball made during festivals", "Yellow or orange color, usually made of besan", "The most famous prasad from Tirupati"] },
+  { name: "Ice Cream", clues: ["Frozen sweet treat loved by kids and adults", "Comes in flavors like Vanilla, Chocolate, and Pista", "The best way to beat the Indian summer heat"] },
+  { name: "Lemon Rice", clues: ["Yellow rice with a tangy, sour flavor", "Tempered with peanuts, curry leaves, and turmeric", "Quick lunch dish often called Chitranna"] },
+  { name: "Bread Jam", clues: ["Simple snack made of two slices and a fruit spread", "Quickest tiffin option for school kids", "Sweet, red fruit spread on toasted or plain bread"] },
+  { name: "Papad", clues: ["Thin, crunchy disc that is roasted or fried", "Side dish that adds crunch to your meal", "Known as Appadam in Telugu"] },
+  { name: "Kheer", clues: ["Rice pudding made with milk and sugar", "Traditional dessert served at festivals", "Often garnished with almonds and raisins"] },
+  { name: "Bajji", clues: ["Stuffed green chili or potato fried in batter", "Hot and spicy street snack served with onions", "A must-have snack at the beach or park"] },
+  { name: "Poha", clues: ["Light breakfast made from flattened rice", "Cooked with turmeric, onions, and peanuts", "Very popular healthy snack in North India"] },
+  { name: "Lassi", clues: ["Sweet, thick yogurt drink served chilled", "Famous Punjabi refreshment often topped with cream", "Served in a tall glass, especially in summer"] },
+  { name: "Chicken 65", clues: ["Spicy, deep-fried red chicken cubes", "Popular appetizer served in restaurants", "Crispy starter with curry leaves and chilies"] },
+  { name: "Khichdi", clues: ["Simple one-pot meal of rice and lentils", "Light food often given when someone is sick", "Healthy, mushy, and very easy to digest"] },
+  { name: "Butter Chicken", clues: ["Creamy tomato chicken curry with lots of butter", "The most famous Indian curry worldwide", "Sweet and spicy gravy that goes best with Naan"] },
+  { name: "Halwa", clues: ["Sweet, dense dessert made from carrot or moong dal", "Slow-cooked with ghee and sugar until soft", "Gajar version is very popular in winter"] },
+];
 
-/* ── CSS Variables ────────────────────────────────────────────── */
-:root {
-  --maroon:        #6B1A1A;
-  --maroon-deep:   #4A0F0F;
-  --maroon-mid:    #8C2424;
-  --saffron:       #E8850A;
-  --saffron-light: #F5A83A;
-  --gold:          #C9942A;
-  --gold-light:    #F5D98B;
-  --mustard:       #D4A017;
-  --emerald:       #1A5C3A;
-  --emerald-light: #2D8A58;
-  --cream:         #FDF3E3;
-  --cream-dark:    #F4E2C8;
-  --cream-mid:     #F9EDD8;
-  --ink:           #2A1505;
-  --ink-mid:       #5C3010;
-  --white:         #FFFDF9;
+const SCREEN = {
+  ROLE_SELECT: "role_select",
+  LOGIN: "login",
+  USERNAME: "username",
+  GAME: "game",
+  GAME_OVER: "game_over",
+  LEADERBOARD: "leaderboard",
+};
 
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body:    'Lora', Georgia, serif;
-  --font-ui:      'Noto Sans', sans-serif;
-
-  --radius-sm:  8px;
-  --radius-md:  16px;
-  --radius-lg:  24px;
-  --radius-xl:  36px;
-
-  --shadow-gold: 0 4px 24px rgba(201,148,42,0.22), 0 1px 4px rgba(107,26,26,0.12);
-  --shadow-deep: 0 8px 40px rgba(42,21,5,0.22), 0 2px 8px rgba(107,26,26,0.14);
-  --shadow-card: 0 2px 16px rgba(107,26,26,0.12);
-
-  --border-gold:   2px solid var(--gold);
-  --border-maroon: 2px solid var(--maroon);
+function getRankLabel(rank) {
+  if (rank === 1) return "🥇 1st";
+  if (rank === 2) return "🥈 2nd";
+  if (rank === 3) return "🥉 3rd";
+  return `#${rank}`;
 }
 
-/* ── Reset & Base ─────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+function getScoreMessage(score) {
+  const max = TOTAL_QUESTIONS * 25;
+  const pct = score / max;
+  if (pct >= 0.9) return { emoji: "🌟", text: "Outstanding! You're a true food expert!" };
+  if (pct >= 0.7) return { emoji: "🎉", text: "Great job! You really know your Indian food!" };
+  if (pct >= 0.5) return { emoji: "👍", text: "Good effort! Keep practicing!" };
+  return { emoji: "🍽️", text: "Better luck next time. Try again!" };
 }
 
-html, body, #root {
-  width: 100%;
-  min-height: 100vh;
-  height: 100%;
+function useGame() {
+  const [usedIndices, setUsedIndices] = useState([]);
+  const [currentFood, setCurrentFood] = useState(null);
+
+  const getNextFood = useCallback(() => {
+    setUsedIndices((prev) => {
+      const pool = prev.length >= foods.length ? [] : prev;
+      const available = foods.map((_, i) => i).filter((i) => !pool.includes(i));
+      const idx = available[Math.floor(Math.random() * available.length)];
+      setCurrentFood(foods[idx]);
+      return pool.length === 0 ? [idx] : [...prev, idx];
+    });
+  }, []);
+
+  const resetGame = useCallback(() => {
+    setUsedIndices([]);
+    setCurrentFood(null);
+  }, []);
+
+  return { currentFood, getNextFood, resetGame };
 }
 
-html {
-  /* Prevent iOS font size adjustment */
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
+export default function App() {
+  const [screen, setScreen] = useState(SCREEN.ROLE_SELECT);
+  const [prevScreen, setPrevScreen] = useState(SCREEN.GAME);
+  const [adminPass, setAdminPass] = useState("");
+  const [username, setUsername] = useState("");
+  const [score, setScore] = useState(0);
+  const [questionNum, setQuestionNum] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [skippedCount, setSkippedCount] = useState(0);
+  const [userAnswer, setUserAnswer] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [wasSkipped, setWasSkipped] = useState(false);
+  const [cluesShown, setCluesShown] = useState(0);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [shake, setShake] = useState(false);
+  const [flash, setFlash] = useState(null);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const { currentFood, getNextFood, resetGame } = useGame();
 
-body {
-  font-family: var(--font-body);
-  font-size: 16px;
-  color: var(--ink);
-  background-color: var(--cream);
-  background-image:
-    radial-gradient(ellipse 68% 38% at 50% 50%, transparent 54%, rgba(201,148,42,0.07) 55%, transparent 65%),
-    repeating-conic-gradient(
-      from 0deg at 50% 50%,
-      rgba(232,133,10,0.045) 0deg 18deg,
-      transparent 18deg 36deg
-    ),
-    radial-gradient(ellipse 90% 90% at 50% 50%, transparent 72%, rgba(107,26,26,0.06) 73%, transparent 80%),
-    radial-gradient(ellipse 110% 90% at 50% 0%, rgba(232,133,10,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 110% 60% at 50% 100%, rgba(107,26,26,0.07) 0%, transparent 55%),
-    linear-gradient(160deg, #fdf3e3 0%, #f9edd5 50%, #fdf3e3 100%);
-  background-attachment: scroll;
-  background-size: 600px 600px, 600px 600px, 600px 600px, 100% 100%, 100% 100%, 100% 100%;
-  background-position: center;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  /* Prevent horizontal scroll on mobile */
-  overflow-x: hidden;
-  /* Safe area support for notched phones */
-  padding-bottom: env(safe-area-inset-bottom);
-}
+  useEffect(() => {
+    const saved = localStorage.getItem("masalaLeaderboard");
+    if (saved) setLeaderboard(JSON.parse(saved));
+  }, []);
 
-/* ── App Wrapper ──────────────────────────────────────────────── */
-.app {
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  padding-top: calc(16px + env(safe-area-inset-top));
-  transition: background 0.3s ease;
-  position: relative;
-}
+  const startQuestion = useCallback(() => {
+    getNextFood();
+    setUserAnswer("");
+    setShowResult(false);
+    setWasSkipped(false);
+    setCluesShown(0);
+  }, [getNextFood]);
 
-/* ── Flash states ─────────────────────────────────────────────── */
-.app.flash-correct { animation: flashCorrect 0.7s ease; }
-.app.flash-wrong   { animation: flashWrong 0.7s ease; }
-.app.flash-skip    { animation: flashSaffron 0.7s ease-in-out; }
+  const handleAdminLogin = () => {
+    if (adminPass === ADMIN_PASSWORD) {
+      setScreen(SCREEN.USERNAME);
+    } else {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+  };
 
-@keyframes flashCorrect {
-  0%, 100% { background-color: transparent; }
-  35%      { background-color: rgba(26,92,58,0.12); }
-}
-@keyframes flashWrong {
-  0%, 100% { background-color: transparent; }
-  35%      { background-color: rgba(107,26,26,0.11); }
-}
-@keyframes flashSaffron {
-  0%, 100% { background-color: transparent; }
-  35%      { background-color: rgba(232,133,10,0.12); }
-}
+  const handleRefreshLeaderboard = () => {
+    const password = prompt("🔄 Enter Refresh Password to CLEAR Leaderboard:");
+    if (password === REFRESH_PASSWORD) {
+      localStorage.removeItem("masalaLeaderboard");
+      setLeaderboard([]);
+      alert("✅ Leaderboard REFRESHED! All scores cleared. Fresh start! 🎉");
+    } else if (password !== null) {
+      alert("❌ Wrong Refresh Password! Leaderboard unchanged.");
+    }
+  };
 
-/* ══════════════════════════════════════════════════════════════
-   ROLE SELECTION SCREEN
-══════════════════════════════════════════════════════════════ */
-.role-screen {
-  width: 100%;
-  max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+  const beginGame = () => {
+    setScore(0);
+    setQuestionNum(1);
+    setCorrectCount(0);
+    setSkippedCount(0);
+    setStreak(0);
+    setBestStreak(0);
+    resetGame();
+    setScreen(SCREEN.GAME);
+    setPrevScreen(SCREEN.GAME);
+    setTimeout(startQuestion, 50);
+  };
 
-.role-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
+  const handleUsernameSubmit = () => {
+    if (!username.trim()) return;
+    beginGame();
+  };
 
-.role-diya {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 4px 16px rgba(201,148,42,0.5));
-  animation: gentleBob 3s ease-in-out infinite;
-}
+  const persistLeaderboard = (finalScore, finalCorrect) => {
+    const entry = {
+      name: username,
+      score: finalScore,
+      correct: finalCorrect,
+      date: new Date().toLocaleDateString("en-IN"),
+    };
+    const updated = [entry, ...leaderboard.filter((e) => e.name !== username)]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+    localStorage.setItem("masalaLeaderboard", JSON.stringify(updated));
+    setLeaderboard(updated);
+  };
 
-.role-brand {
-  font-family: var(--font-display);
-  font-size: 2.6rem;
-  font-weight: 700;
-  color: var(--maroon);
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 12px rgba(107,26,26,0.15);
-  line-height: 1.1;
-}
+  const pts = currentFood ? 25 - cluesShown * 5 : 25;
 
-.role-tagline {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--saffron);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-top: 6px;
-}
+  const handleSubmit = () => {
+    if (showResult) return;
+    const correct = userAnswer.trim().toLowerCase() === currentFood.name.toLowerCase();
+    setShowResult(true);
+    setWasSkipped(false);
 
-.role-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 18px auto 16px;
-  width: 180px;
-}
+    let newScore = score;
+    let newCorrect = correctCount;
+    let newStreak = streak;
 
-.role-divider-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-}
+    if (correct) {
+      newScore = score + pts;
+      newCorrect = correctCount + 1;
+      newStreak = streak + 1;
+      setScore(newScore);
+      setCorrectCount(newCorrect);
+      setStreak(newStreak);
+      if (newStreak > bestStreak) {
+        setBestStreak(newStreak);
+      }
+      setFlash("correct");
+    } else {
+      setStreak(0);
+      setFlash("wrong");
+    }
+    persistLeaderboard(newScore, newCorrect);
+    setTimeout(() => setFlash(null), 700);
+  };
 
-.role-divider-icon {
-  color: var(--gold);
-  font-size: 0.9rem;
-}
+  const handleSkip = () => {
+    if (showResult) return;
+    setShowResult(true);
+    setWasSkipped(true);
+    setSkippedCount((prev) => prev + 1);
+    setStreak(0);
+    setFlash("skip");
+    persistLeaderboard(score, correctCount);
+    setTimeout(() => setFlash(null), 700);
+  };
 
-.role-prompt {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  color: var(--ink-mid);
-  font-style: italic;
-}
+  const handleNextQuestion = () => {
+    if (questionNum >= TOTAL_QUESTIONS) {
+      setPrevScreen(SCREEN.GAME_OVER);
+      setScreen(SCREEN.GAME_OVER);
+    } else {
+      setQuestionNum((q) => q + 1);
+      startQuestion();
+    }
+  };
 
-/* Role Cards Grid */
-.role-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-}
+  const handlePlayAgain = () => {
+    beginGame();
+  };
 
-/* Individual Role Card */
-.role-card {
-  position: relative;
-  background: var(--white);
-  border: var(--border-gold);
-  border-radius: var(--radius-xl);
-  padding: 32px 20px 28px;
-  text-align: center;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  /* Remove default button styles */
-  font-family: inherit;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-}
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSubmit();
+  };
 
-/* Top stripe */
-.role-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 5px;
-  background: linear-gradient(90deg,
-    var(--maroon) 0%, var(--saffron) 30%, var(--gold) 50%, var(--saffron) 70%, var(--maroon) 100%
+  const showClue = (n) => {
+    if (cluesShown < n) setCluesShown(n);
+  };
+
+  const isCorrect =
+    showResult &&
+    currentFood &&
+    userAnswer.trim().toLowerCase() === currentFood.name.toLowerCase();
+
+  const isSkipped = showResult && wasSkipped;
+
+  const myRank = leaderboard.findIndex((p) => p.name === username) + 1;
+  const scoreMsg = getScoreMessage(score);
+
+  return (
+    <div className={`app${flash ? ` flash-${flash}` : ""}`}>
+
+      {/* ── ROLE SELECTION ── */}
+      {screen === SCREEN.ROLE_SELECT && (
+        <div className="role-screen">
+          <div className="role-header">
+            <div className="role-diya">🍛</div>
+            <div className="role-brand">Masala Mahal</div>
+            <div className="role-tagline">Indian Food Quiz</div>
+            <div className="role-divider">
+              <span className="role-divider-line"></span>
+              <span className="role-divider-icon">✦</span>
+              <span className="role-divider-line"></span>
+            </div>
+            <p className="role-prompt">Who are you?</p>
+          </div>
+
+          <div className="role-cards">
+            <button
+              className="role-card role-card--player"
+              onClick={() => setScreen(SCREEN.USERNAME)}
+            >
+              <div className="role-card-glow"></div>
+              <div className="role-card-icon">🎮</div>
+              <div className="role-card-title">Player</div>
+              <div className="role-card-desc">
+                Guess the dish, earn points &amp; climb the leaderboard
+              </div>
+              <div className="role-card-arrow">Play Now →</div>
+            </button>
+
+            <button
+              className="role-card role-card--admin"
+              onClick={() => setScreen(SCREEN.LOGIN)}
+            >
+              <div className="role-card-glow"></div>
+              <div className="role-card-icon">🛡️</div>
+              <div className="role-card-title">Admin</div>
+              <div className="role-card-desc">
+                Manage the game, reset scores &amp; control the leaderboard
+              </div>
+              <div className="role-card-arrow">Login →</div>
+            </button>
+          </div>
+
+          <div className="role-footer">Indian Studies</div>
+        </div>
+      )}
+
+      {/* ── ADMIN LOGIN ── */}
+      {screen === SCREEN.LOGIN && (
+        <div className="card">
+          <div className="login-header">
+            <button
+              className="back-btn"
+              onClick={() => { setAdminPass(""); setScreen(SCREEN.ROLE_SELECT); }}
+              aria-label="Go back"
+            >
+              ← Back
+            </button>
+            <div className="login-emoji">🛡️</div>
+            <div className="login-title">Admin Login</div>
+            <div className="login-subtitle">Enter password to manage the game</div>
+          </div>
+          <div className="login-body">
+            <label className="login-label">Password</label>
+            <input
+              className={`login-input${shake ? " shake" : ""}`}
+              type="password"
+              placeholder="Enter admin password"
+              value={adminPass}
+              onChange={(e) => setAdminPass(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+            />
+            <button className="btn-primary" onClick={handleAdminLogin}>
+              Enter Game ✦
+            </button>
+            <div className="login-subtitle indian-studies">Indian Studies</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── USERNAME ── */}
+      {screen === SCREEN.USERNAME && (
+        <div className="card">
+          <div className="login-header">
+            <button
+              className="back-btn"
+              onClick={() => { setUsername(""); setScreen(SCREEN.ROLE_SELECT); }}
+              aria-label="Go back"
+            >
+              ← Back
+            </button>
+            <div className="login-emoji">👤</div>
+            <div className="login-title">Who&apos;s Playing?</div>
+            <div className="login-subtitle">Your name appears on the leaderboard</div>
+          </div>
+          <div className="login-body">
+            <label className="login-label">Your Name</label>
+            <input
+              className="login-input"
+              type="text"
+              placeholder="e.g. Mohith, Jayanth, Azu..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleUsernameSubmit()}
+              maxLength={20}
+            />
+            <button
+              className="btn-primary"
+              onClick={handleUsernameSubmit}
+              disabled={!username.trim()}
+            >
+              Start Playing 🎮
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── GAME ── */}
+      {screen === SCREEN.GAME && currentFood && (
+        <div className="game-wrap">
+          <div className="topbar">
+            <div className="brand">🍲 Masala Mahal</div>
+            <div className="user-chip">
+              <span>👤 {username}</span>
+              <button
+                className="lb-btn"
+                onClick={() => { setPrevScreen(SCREEN.GAME); setScreen(SCREEN.LEADERBOARD); }}
+              >
+                🏆 Leaderboard
+              </button>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="progress-wrap">
+            <div className="progress-label">
+              <span>Question {questionNum} of {TOTAL_QUESTIONS}</span>
+              <span>{correctCount} correct so far</span>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${((questionNum - 1) / TOTAL_QUESTIONS) * 100}%` }}
+              />
+            </div>
+            <div className="progress-dots">
+              {Array.from({ length: TOTAL_QUESTIONS }, (_, i) => (
+                <div
+                  key={i}
+                  className={`progress-dot${
+                    i < questionNum - 1 ? " done" : i === questionNum - 1 ? " active" : ""
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="stats">
+            <div className="stat-card">
+              <div className="stat-icon">🏆</div>
+              <div className="stat-val">{score}</div>
+              <div className="stat-lbl">Score</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">📋</div>
+              <div className="stat-val">{questionNum}/{TOTAL_QUESTIONS}</div>
+              <div className="stat-lbl">Question</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">🔥</div>
+              <div className="stat-val">{streak}</div>
+              <div className="stat-lbl">Streak</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">💡</div>
+              <div className="stat-val">{cluesShown}/2</div>
+              <div className="stat-lbl">Clues</div>
+            </div>
+          </div>
+
+          <div className="q-card">
+            <div className="q-card-top">
+              <span className="q-tag">Which dish is this?</span>
+              <span className="pts-tag">+{pts} pts</span>
+            </div>
+            <div className="clue-text">&quot;{currentFood.clues[0]}&quot;</div>
+            {cluesShown >= 1 && (
+              <div className="clue-extra">
+                <strong>Clue 1:</strong> {currentFood.clues[1]}
+              </div>
+            )}
+            {cluesShown >= 2 && (
+              <div className="clue-extra">
+                <strong>Clue 2:</strong> {currentFood.clues[2]}
+              </div>
+            )}
+          </div>
+
+          <div className="input-row">
+            <input
+              className="answer-input"
+              type="text"
+              placeholder="Type the dish name..."
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={showResult}
+            />
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={!userAnswer.trim() || showResult}
+            >
+              Submit ✓
+            </button>
+          </div>
+
+          {!showResult && (
+            <div className="clue-btns">
+              <button
+                className={`clue-btn ${cluesShown >= 1 ? "used" : "available"}`}
+                onClick={() => showClue(1)}
+                disabled={cluesShown >= 1}
+              >
+                💡 Clue 1 (−5 pts)
+              </button>
+              <button
+                className={`clue-btn ${
+                  cluesShown >= 2 ? "used" : cluesShown < 1 ? "locked" : "available"
+                }`}
+                onClick={() => showClue(2)}
+                disabled={cluesShown >= 2 || cluesShown < 1}
+                title={cluesShown < 1 ? "Reveal Clue 1 first" : ""}
+              >
+                💡 Clue 2 (−5 pts)
+              </button>
+              <button 
+                className="skip-btn" 
+                onClick={handleSkip}
+              >
+                ⏭️ Skip
+              </button>
+            </div>
+          )}
+
+          {showResult && (
+            <>
+              <div className={`result-block ${isCorrect ? "correct" : isSkipped ? "skip" : "wrong"}`}>
+                <div className="result-verdict">
+                  {isCorrect ? "✅ Correct!" : isSkipped ? "⏭️ Skipped!" : "❌ Incorrect!"}
+                </div>
+                <div className="result-answer">
+                  The dish was: <strong>{currentFood.name}</strong>
+                  {isSkipped ? (
+                    <span style={{ fontSize: "0.9em", opacity: 0.8 }}>
+                      <br />You chose to skip (0 points)
+                    </span>
+                  ) : !isCorrect && (
+                    <>
+                      <br />
+                      You answered: <strong>&quot;{userAnswer}&quot;</strong>
+                    </>
+                  )}
+                </div>
+                {isCorrect && <div className="pts-earned">+{pts} points earned!</div>}
+                {isSkipped && <div className="pts-earned skip-pts">0 points (skipped)</div>}
+                {isCorrect && streak > 1 && (
+                  <div className="streak-bonus">🔥 {streak} streak!</div>
+                )}
+              </div>
+              <button className="next-btn" onClick={handleNextQuestion}>
+                {questionNum >= TOTAL_QUESTIONS ? "See Results 🏁" : `Next Question ➡ (${questionNum}/${TOTAL_QUESTIONS})`}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── GAME OVER ── */}
+      {screen === SCREEN.GAME_OVER && (
+        <div className="gameover-wrap">
+          <div className="gameover-card">
+            <div className="gameover-top">
+              <div className="gameover-emoji">{scoreMsg.emoji}</div>
+              <div className="gameover-title">Quiz Complete!</div>
+              <div className="gameover-subtitle">{scoreMsg.text}</div>
+            </div>
+
+            <div className="gameover-body">
+              <div className="gameover-player">Well played, <strong>{username}</strong>! 🎊</div>
+
+              <div className="gameover-stats">
+                <div className="go-stat">
+                  <div className="go-stat-val">{score}</div>
+                  <div className="go-stat-lbl">Final Score</div>
+                </div>
+                <div className="go-stat-divider" />
+                <div className="go-stat">
+                  <div className="go-stat-val">{correctCount}<span className="go-stat-of">/{TOTAL_QUESTIONS}</span></div>
+                  <div className="go-stat-lbl">Correct</div>
+                </div>
+                <div className="go-stat-divider" />
+                <div className="go-stat">
+                  <div className="go-stat-val go-stat-rank">{myRank ? getRankLabel(myRank) : "—"}</div>
+                  <div className="go-stat-lbl">Your Rank</div>
+                </div>
+              </div>
+
+              {/* Additional Stats */}
+              <div className="gameover-extras">
+                <div className="extra-stat">
+                  <span className="extra-stat-icon">🔥</span>
+                  <span className="extra-stat-label">Best Streak</span>
+                  <span className="extra-stat-val">{bestStreak}</span>
+                </div>
+                <div className="extra-stat">
+                  <span className="extra-stat-icon">⏭️</span>
+                  <span className="extra-stat-label">Skipped</span>
+                  <span className="extra-stat-val">{skippedCount}</span>
+                </div>
+                <div className="extra-stat">
+                  <span className="extra-stat-icon">📊</span>
+                  <span className="extra-stat-label">Accuracy</span>
+                  <span className="extra-stat-val">{Math.round((correctCount / TOTAL_QUESTIONS) * 100)}%</span>
+                </div>
+              </div>
+
+              <div className="gameover-actions">
+                <button className="btn-primary" onClick={handlePlayAgain}>
+                  🔄 Play Again
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => { setPrevScreen(SCREEN.GAME_OVER); setScreen(SCREEN.LEADERBOARD); }}
+                >
+                  🏆 Leaderboard
+                </button>
+                <button
+                  className="btn-ghost"
+                  onClick={() => { setUsername(""); setScreen(SCREEN.ROLE_SELECT); }}
+                >
+                  🏠 Home
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── LEADERBOARD OVERLAY ── */}
+      {screen === SCREEN.LEADERBOARD && (
+        <div className="overlay" onClick={() => setScreen(prevScreen)}>
+          <div className="lb-card" onClick={(e) => e.stopPropagation()}>
+            <div className="lb-head">
+              <div
+                className="lb-title"
+                onDoubleClick={() => {
+                  const pass = prompt("Admin Reset Password:");
+                  if (pass === "1234") {
+                    localStorage.removeItem("masalaLeaderboard");
+                    setLeaderboard([]);
+                    alert("Admin Reset Complete! ✅");
+                  }
+                }}
+                style={{ cursor: "pointer", userSelect: "none" }}
+              >
+                🏆 Top Players
+              </div>
+              <div className="lb-actions">
+                <button
+                  className="refresh-btn"
+                  onClick={handleRefreshLeaderboard}
+                  title="🔄 Click to CLEAR & Reset Leaderboard (Password Required)"
+                >
+                  🔄
+                </button>
+                <button
+                  className="close-btn"
+                  onClick={() => setScreen(prevScreen)}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="lb-list">
+              {leaderboard.length === 0 ? (
+                <div className="lb-empty">No scores yet — be the first! 🌟</div>
+              ) : (
+                leaderboard.map((p, i) => (
+                  <div
+                    key={i}
+                    className={`lb-row${p.name === username ? " me" : ""}`}
+                  >
+                    <span className={`lb-rank${i < 3 ? " top" : ""}`}>
+                      {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
+                    </span>
+                    <span className="lb-name">{p.name}</span>
+                    <span className="lb-score">{p.score}</span>
+                    <span className="lb-date">{p.date}</span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="lb-foot">
+              Your rank : <strong>{myRank || "—"}</strong>
+              &nbsp;||&nbsp; Score : <strong>{score}</strong>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-}
-
-.role-card:hover,
-.role-card:focus-visible {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: var(--shadow-deep), 0 0 0 3px rgba(201,148,42,0.22);
-}
-
-.role-card:active {
-  transform: translateY(-2px) scale(0.99);
-}
-
-/* Glow blob */
-.role-card-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.role-card:hover .role-card-glow { opacity: 1; }
-
-.role-card--player .role-card-glow {
-  background: radial-gradient(circle at 50% 60%, rgba(26,92,58,0.08), transparent 70%);
-}
-.role-card--admin .role-card-glow {
-  background: radial-gradient(circle at 50% 60%, rgba(107,26,26,0.08), transparent 70%);
-}
-
-.role-card-icon {
-  font-size: 3rem;
-  display: block;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
-  transition: transform 0.3s ease;
-}
-
-.role-card:hover .role-card-icon { transform: scale(1.12) rotate(-3deg); }
-
-.role-card-title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--maroon);
-  letter-spacing: 0.03em;
-}
-
-.role-card-desc {
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  color: var(--ink-mid);
-  line-height: 1.5;
-  padding: 0 4px;
-}
-
-.role-card-arrow {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-top: 4px;
-  padding: 6px 16px;
-  border-radius: 99px;
-  transition: background 0.18s, color 0.18s;
-}
-
-.role-card--player .role-card-arrow {
-  color: var(--white);
-  background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-light) 100%);
-}
-.role-card--admin .role-card-arrow {
-  color: var(--white);
-  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-mid) 100%);
-}
-
-.role-footer {
-  margin-top: 28px;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgba(92,48,16,0.45);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   BACK BUTTON (on Login / Username screens)
-══════════════════════════════════════════════════════════════ */
-.back-btn {
-  position: absolute;
-  top: 14px;
-  left: 16px;
-  background: rgba(245,217,139,0.15);
-  border: 1px solid rgba(245,217,139,0.35);
-  color: rgba(245,217,139,0.85);
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 99px;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: background 0.18s, transform 0.15s;
-  z-index: 2;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.back-btn:hover {
-  background: rgba(245,217,139,0.28);
-  transform: translateX(-2px);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   LOGIN / USERNAME CARD
-══════════════════════════════════════════════════════════════ */
-.card {
-  background: var(--white);
-  border: var(--border-gold);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-deep);
-  width: 100%;
-  max-width: 420px;
-  overflow: hidden;
-  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-}
-
-.card::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 5px;
-  background: linear-gradient(90deg,
-    var(--maroon) 0%, var(--saffron) 30%, var(--gold) 50%, var(--saffron) 70%, var(--maroon) 100%
-  );
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.login-header {
-  background: linear-gradient(135deg, var(--maroon-deep) 0%, var(--maroon) 60%, var(--maroon-mid) 100%);
-  padding: 36px 32px 28px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.login-header::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle 120px at 50% 60%, rgba(201,148,42,0.12), transparent),
-    repeating-conic-gradient(from 0deg at 50% 70%, rgba(245,217,139,0.05) 0deg 30deg, transparent 30deg 60deg);
-  pointer-events: none;
-}
-
-.login-emoji {
-  font-size: 3.2rem;
-  display: block;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
-  animation: gentleBob 3s ease-in-out infinite;
-}
-
-@keyframes gentleBob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
-
-.login-title {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--gold-light);
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  line-height: 1.2;
-}
-
-.login-subtitle {
-  font-family: var(--font-ui);
-  font-size: 0.82rem;
-  color: rgba(221,195,125,0.75);
-  margin-top: 6px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.indian-studies {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9em;
-  opacity: 0.8;
-}
-
-.login-body {
-  padding: 32px 28px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.login-label {
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--maroon);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: -8px;
-}
-
-.login-input {
-  width: 100%;
-  padding: 13px 16px;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: var(--ink);
-  background: var(--cream);
-  border: 2px solid var(--cream-dark);
-  border-radius: var(--radius-md);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  /* Prevent iOS zoom on focus (font-size must be >= 16px) */
-  font-size: max(16px, 1rem);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.login-input:focus {
-  border-color: var(--saffron);
-  box-shadow: 0 0 0 3px rgba(232,133,10,0.14);
-  background: var(--white);
-}
-
-.login-input::placeholder { color: rgba(92,48,16,0.4); }
-
-.login-input.shake {
-  animation: shake 0.45s cubic-bezier(.36,.07,.19,.97);
-  border-color: var(--maroon);
-}
-
-@keyframes shake {
-  10%, 90%  { transform: translateX(-3px); }
-  20%, 80%  { transform: translateX(5px); }
-  30%, 50%, 70% { transform: translateX(-6px); }
-  40%, 60%  { transform: translateX(6px); }
-  100%      { transform: translateX(0); }
-}
-
-/* ── Primary Button ───────────────────────────────────────────── */
-.btn-primary {
-  width: 100%;
-  padding: 14px 20px;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-mid) 100%);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  box-shadow: var(--shadow-gold), 0 0 0 0 rgba(232,133,10,0);
-  transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
-  position: relative;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 48px; /* Touch target */
-}
-
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 40%, rgba(245,217,139,0.18) 100%);
-  pointer-events: none;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-deep), 0 0 0 3px rgba(232,133,10,0.18);
-  background: linear-gradient(135deg, var(--maroon-mid) 0%, var(--saffron) 100%);
-}
-
-.btn-primary:active:not(:disabled) { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-
-/* ══════════════════════════════════════════════════════════════
-   GAME LAYOUT
-══════════════════════════════════════════════════════════════ */
-.game-wrap {
-  width: 100%;
-  max-width: 560px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  animation: slideUp 0.4s ease;
-  /* Ensure proper scroll on mobile */
-  padding-bottom: 8px;
-}
-
-/* ── Top Bar ──────────────────────────────────────────────────── */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, var(--maroon-deep) 0%, var(--maroon) 100%);
-  border-radius: var(--radius-lg);
-  padding: 12px 20px;
-  box-shadow: var(--shadow-card);
-  border: var(--border-gold);
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.brand {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--gold-light);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.3);
-  white-space: nowrap;
-}
-
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.user-chip span {
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  color: rgba(245,217,139,0.85);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.lb-btn {
-  background: rgba(245,217,139,0.15);
-  border: 1px solid rgba(245,217,139,0.35);
-  color: var(--gold-light);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.18s, transform 0.15s;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 36px;
-}
-
-.lb-btn:hover { background: rgba(245,217,139,0.28); transform: translateY(-1px); }
-
-/* ── Stats Row ────────────────────────────────────────────────── */
-.stats { display: flex; gap: 10px; }
-
-.stat-card {
-  flex: 1;
-  background: var(--white);
-  border: var(--border-gold);
-  border-radius: var(--radius-md);
-  padding: 12px 8px 10px;
-  text-align: center;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.2s;
-}
-
-.stat-card:hover { transform: translateY(-2px); }
-
-.stat-icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
-
-.stat-val {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--maroon);
-  line-height: 1;
-}
-
-.stat-lbl {
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  color: var(--ink-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 3px;
-}
-
-/* ── Question Card ────────────────────────────────────────────── */
-.q-card {
-  background: var(--white);
-  border: var(--border-gold);
-  border-radius: var(--radius-lg);
-  padding: 26px 24px 24px;
-  box-shadow: var(--shadow-deep);
-  position: relative;
-  overflow: hidden;
-}
-
-.q-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg,
-    var(--maroon) 0%, var(--saffron) 25%, var(--gold) 50%, var(--saffron) 75%, var(--maroon) 100%
-  );
-}
-
-.q-card::after {
-  content: '✦';
-  position: absolute;
-  bottom: 14px; right: 18px;
-  font-size: 0.85rem;
-  color: rgba(201,148,42,0.25);
-  pointer-events: none;
-}
-
-.q-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.q-tag {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--maroon);
-  background: rgba(107,26,26,0.07);
-  border: 1px solid rgba(107,26,26,0.15);
-  border-radius: 99px;
-  padding: 4px 12px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.pts-tag {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--emerald);
-  background: rgba(26,92,58,0.08);
-  border: 1px solid rgba(26,92,58,0.2);
-  border-radius: 99px;
-  padding: 4px 14px;
-}
-
-.clue-text {
-  font-family: var(--font-display);
-  font-size: 1.18rem;
-  font-weight: bold;
-  color: var(--ink);
-  line-height: 1.65;
-  padding: 14px 18px;
-  background: var(--cream);
-  border-left: 3px solid var(--saffron);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin-bottom: 10px;
-}
-
-.clue-extra {
-  font-family: var(--font-body);
-  font-size: 0.93rem;
-  color: var(--ink-mid);
-  background: rgba(232,133,10,0.07);
-  border: 1px dashed rgba(232,133,10,0.35);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-top: 10px;
-  animation: fadeIn 0.3s ease;
-  line-height: 1.5;
-}
-
-.clue-extra strong { color: var(--saffron); font-weight: 600; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Input Row ────────────────────────────────────────────────── */
-.input-row { display: flex; gap: 10px; }
-
-.answer-input {
-  flex: 1;
-  padding: 14px 16px;
-  font-family: var(--font-body);
-  color: var(--ink);
-  background: var(--white);
-  border: 2px solid var(--cream-dark);
-  border-radius: var(--radius-md);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-shadow: var(--shadow-card);
-  /* Prevent iOS zoom */
-  font-size: max(16px, 1rem);
-  -webkit-appearance: none;
-  appearance: none;
-  min-height: 48px;
-}
-
-.answer-input:focus {
-  border-color: var(--saffron);
-  box-shadow: 0 0 0 3px rgba(232,133,10,0.14), var(--shadow-card);
-}
-
-.answer-input::placeholder { color: rgba(92,48,16,0.4); }
-.answer-input:disabled { background: var(--cream); color: var(--ink-mid); }
-
-.submit-btn {
-  padding: 14px 22px;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-light) 100%);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(26,92,58,0.28);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
-  letter-spacing: 0.03em;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 48px;
-}
-
-.submit-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(26,92,58,0.35);
-  background: linear-gradient(135deg, var(--emerald-light) 0%, var(--emerald) 100%);
-}
-
-.submit-btn:active:not(:disabled) { transform: translateY(0); }
-.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ── Clue Buttons ─────────────────────────────────────────────── */
-.clue-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
-.clue-btn {
-  flex: 1;
-  min-width: 120px;
-  padding: 12px 14px;
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  border: 2px solid;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-  letter-spacing: 0.03em;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 48px;
-}
-
-.clue-btn.available {
-  color: var(--white);
-  background: linear-gradient(135deg, var(--saffron) 0%, var(--mustard) 100%);
-  border-color: var(--mustard);
-  box-shadow: 0 3px 12px rgba(232,133,10,0.28);
-}
-
-.clue-btn.available:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 18px rgba(232,133,10,0.38);
-}
-
-.clue-btn.used,
-.clue-btn.locked {
-  color: rgba(92,48,16,0.45);
-  background: var(--cream);
-  border-color: var(--cream-dark);
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-/* ── Skip Button ─────────────────────────────────────────────── */
-.skip-btn {
-  padding: 12px 18px;
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--mustard) 0%, var(--saffron) 100%);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(212,160,23,0.28);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
-  letter-spacing: 0.03em;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 48px;
-  flex: 1;
-  min-width: 100px;
-}
-
-.skip-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212,160,23,0.35);
-  background: linear-gradient(135deg, var(--saffron) 0%, var(--mustard) 100%);
-}
-
-.skip-btn:active:not(:disabled) { transform: translateY(0); }
-.skip-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ── Result Block ─────────────────────────────────────────────── */
-.result-block {
-  border-radius: var(--radius-lg);
-  padding: 22px 24px;
-  box-shadow: var(--shadow-card);
-  animation: popIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.result-block.correct {
-  background: linear-gradient(135deg, rgba(26,92,58,0.08) 0%, rgba(26,92,58,0.12) 100%);
-  border: 2px solid var(--emerald-light);
-}
-
-.result-block.wrong {
-  background: linear-gradient(135deg, rgba(107,26,26,0.07) 0%, rgba(107,26,26,0.12) 100%);
-  border: 2px solid var(--maroon);
-}
-
-.result-block.skip {
-  background: linear-gradient(135deg, rgba(212,160,23,0.08) 0%, rgba(232,133,10,0.12) 100%);
-  border: 2px solid var(--saffron-light);
-}
-
-.result-verdict {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.result-block.correct .result-verdict { color: var(--emerald); }
-.result-block.wrong .result-verdict   { color: var(--maroon); }
-.result-block.skip .result-verdict    { color: var(--saffron); }
-
-.result-answer {
-  font-family: var(--font-body);
-  font-size: 0.97rem;
-  color: var(--ink-mid);
-  line-height: 1.6;
-}
-
-.result-answer strong { color: var(--ink); font-weight: 600; }
-
-.pts-earned {
-  margin-top: 10px;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--saffron);
-  letter-spacing: 0.02em;
-}
-
-.skip-pts {
-  color: var(--saffron) !important;
-  font-weight: 700;
-}
-
-.streak-bonus {
-  margin-top: 8px;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--emerald);
-  animation: pulse 0.5s ease;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* ── Next Button ──────────────────────────────────────────────── */
-.next-btn {
-  width: 100%;
-  padding: 15px 20px;
-  font-family: var(--font-display);
-  font-size: 1.08rem;
-  font-weight: 700;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-mid) 60%, var(--saffron) 100%);
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  box-shadow: var(--shadow-deep);
-  transition: transform 0.18s, box-shadow 0.18s;
-  position: relative;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  min-height: 52px;
-}
-
-.next-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, transparent 40%, rgba(245,217,139,0.16) 100%);
-  pointer-events: none;
-}
-
-.next-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(107,26,26,0.28), 0 0 0 3px rgba(232,133,10,0.2);
-}
-
-.next-btn:active { transform: translateY(0); }
-
-/* ══════════════════════════════════════════════════════════════
-   LEADERBOARD OVERLAY
-══════════════════════════════════════════════════════════════ */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(42,21,5,0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  animation: fadeIn 0.25s ease;
-}
-
-.lb-card {
-  background: var(--white);
-  border: var(--border-gold);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 480px;
-  max-height: 86vh;
-  max-height: 86dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: var(--shadow-deep);
-  animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative;
-}
-
-.lb-card::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 5px;
-  background: linear-gradient(90deg,
-    var(--maroon) 0%, var(--saffron) 30%, var(--gold) 50%, var(--saffron) 70%, var(--maroon) 100%
-  );
-  flex-shrink: 0;
-}
-
-.lb-head {
-  background: linear-gradient(135deg, var(--maroon-deep) 0%, var(--maroon) 100%);
-  padding: 20px 22px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.lb-title {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: var(--gold-light);
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.25);
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
-}
-
-.lb-actions { display: flex; gap: 10px; align-items: center; }
-
-.refresh-btn {
-  background: rgba(255,107,53,0.18);
-  border: 2px solid rgba(255,107,53,0.4);
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--saffron);
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.refresh-btn:hover {
-  background: rgba(255,107,53,0.3);
-  transform: rotate(180deg) scale(1.05);
-  box-shadow: 0 4px 12px rgba(255,107,53,0.3);
-}
-
-.refresh-btn:active { transform: scale(0.95); }
-
-.close-btn {
-  background: rgba(245,217,139,0.15);
-  border: 1px solid rgba(245,217,139,0.35);
-  color: var(--gold-light);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.18s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.close-btn:hover { background: rgba(245,217,139,0.28); transform: rotate(90deg); }
-
-.lb-list {
-  overflow-y: auto;
-  flex: 1;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.lb-list::-webkit-scrollbar { width: 5px; }
-.lb-list::-webkit-scrollbar-track { background: var(--cream); border-radius: 3px; }
-.lb-list::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
-
-.lb-empty {
-  text-align: center;
-  padding: 40px 20px;
-  font-family: var(--font-display);
-  color: var(--ink-mid);
-  font-size: 1rem;
-}
-
-.lb-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--cream-mid);
-  border: 1px solid var(--cream-dark);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.lb-row:hover { transform: translateX(3px); box-shadow: var(--shadow-card); }
-
-.lb-row.me {
-  background: linear-gradient(135deg, rgba(201,148,42,0.1), rgba(232,133,10,0.08));
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px rgba(201,148,42,0.18);
-}
-
-.lb-rank { font-family: var(--font-ui); font-size: 0.9rem; font-weight: 700; color: var(--ink-mid); min-width: 32px; }
-.lb-rank.top { font-size: 1.2rem; }
-
-.lb-name { flex: 1; font-family: var(--font-body); font-size: 0.97rem; font-weight: 500; color: var(--ink); }
-
-.lb-score { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--maroon); }
-
-.lb-date { font-family: var(--font-ui); font-size: 0.72rem; color: var(--ink-mid); opacity: 0.7; min-width: 60px; text-align: right; }
-
-.lb-foot {
-  border-top: 1px solid var(--cream-dark);
-  padding: 14px 22px;
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  color: var(--ink-mid);
-  background: var(--cream);
-  flex-shrink: 0;
-}
-
-.lb-foot strong { color: var(--maroon); }
-
-/* ══════════════════════════════════════════════════════════════
-   PROGRESS BAR
-══════════════════════════════════════════════════════════════ */
-.progress-wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--ink-mid);
-  padding: 0 2px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: var(--cream-dark);
-  border-radius: 99px;
-  overflow: hidden;
-  border: 1px solid rgba(201,148,42,0.2);
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--maroon) 0%, var(--saffron) 60%, var(--gold) 100%);
-  border-radius: 99px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.progress-dots {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  flex-wrap: nowrap;
-  padding: 2px 0;
-}
-
-.progress-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--cream-dark);
-  border: 1.5px solid rgba(201,148,42,0.3);
-  flex-shrink: 0;
-  transition: background 0.3s, border-color 0.3s, transform 0.2s;
-}
-
-.progress-dot.done {
-  background: var(--saffron);
-  border-color: var(--saffron);
-}
-
-.progress-dot.active {
-  background: var(--maroon);
-  border-color: var(--maroon);
-  transform: scale(1.3);
-  box-shadow: 0 0 0 3px rgba(107,26,26,0.18);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   GAME OVER SCREEN
-══════════════════════════════════════════════════════════════ */
-.gameover-wrap {
-  width: 100%;
-  max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.gameover-card {
-  width: 100%;
-  background: var(--white);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-deep);
-  border: var(--border-gold);
-}
-
-.gameover-top {
-  background: linear-gradient(135deg, var(--maroon-deep) 0%, var(--maroon) 55%, var(--maroon-mid) 100%);
-  padding: 36px 24px 32px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.gameover-top::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-conic-gradient(
-    from 0deg at 50% 50%,
-    rgba(201,148,42,0.07) 0deg 20deg,
-    transparent 20deg 40deg
-  );
-  pointer-events: none;
-}
-
-/* Rainbow stripe at top */
-.gameover-card::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 5px;
-  background: linear-gradient(90deg,
-    var(--maroon) 0%, var(--saffron) 30%, var(--gold) 50%, var(--saffron) 70%, var(--maroon) 100%
-  );
-}
-
-.gameover-emoji {
-  font-size: 3.5rem;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 1;
-  animation: gentleBob 2s ease-in-out infinite;
-}
-
-.gameover-title {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--gold-light);
-  letter-spacing: 0.04em;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  position: relative;
-  z-index: 1;
-}
-
-.gameover-subtitle {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: rgba(245,217,139,0.82);
-  margin-top: 8px;
-  font-style: italic;
-  position: relative;
-  z-index: 1;
-}
-
-.gameover-body {
-  padding: 28px 24px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.gameover-player {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  color: var(--ink-mid);
-  font-style: italic;
-}
-
-.gameover-player strong {
-  color: var(--maroon);
-  font-style: normal;
-}
-
-.gameover-stats {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  background: linear-gradient(135deg, var(--cream) 0%, var(--cream-mid) 100%);
-  border: var(--border-gold);
-  border-radius: var(--radius-lg);
-  padding: 20px 12px;
-}
-
-.go-stat {
-  flex: 1;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.go-stat-val {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--maroon);
-  line-height: 1;
-}
-
-.go-stat-rank {
-  font-size: 1.2rem;
-}
-
-.go-stat-of {
-  font-size: 1rem;
-  color: var(--ink-mid);
-  font-weight: 500;
-}
-
-.go-stat-lbl {
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--ink-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.go-stat-divider {
-  width: 1px;
-  height: 48px;
-  background: linear-gradient(180deg, transparent, var(--gold), transparent);
-  flex-shrink: 0;
-  margin: 0 4px;
-}
-
-/* ── Game Over Extra Stats ─────────────────────────────────────── */
-.gameover-extras {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.extra-stat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--cream);
-  border: 1px solid var(--cream-dark);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-}
-
-.extra-stat-icon {
-  font-size: 1rem;
-}
-
-.extra-stat-label {
-  color: var(--ink-mid);
-  font-weight: 500;
-}
-
-.extra-stat-val {
-  color: var(--maroon);
-  font-weight: 700;
-}
-
-.gameover-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Secondary & Ghost button variants */
-.btn-secondary {
-  width: 100%;
-  padding: 13px 20px;
-  border-radius: var(--radius-md);
-  font-family: var(--font-ui);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: var(--border-maroon);
-  background: transparent;
-  color: var(--maroon);
-  letter-spacing: 0.03em;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.btn-secondary:hover {
-  background: rgba(107,26,26,0.06);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card);
-}
-
-.btn-secondary:active { transform: scale(0.98); }
-
-.btn-ghost {
-  width: 100%;
-  padding: 11px 20px;
-  border-radius: var(--radius-md);
-  font-family: var(--font-ui);
-  font-size: 0.92rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid rgba(201,148,42,0.35);
-  background: transparent;
-  color: var(--ink-mid);
-  transition: background 0.2s, transform 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.btn-ghost:hover {
-  background: rgba(201,148,42,0.08);
-  transform: translateY(-1px);
-}
-
-.btn-ghost:active { transform: scale(0.98); }
-
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE FIRST
-══════════════════════════════════════════════════════════════ */
-
-/* ── Very small phones (< 360px) ─────────────────────────────── */
-@media (max-width: 359px) {
-  .role-brand { font-size: 2rem; }
-  .role-diya  { font-size: 3rem; }
-  .role-cards { gap: 10px; }
-  .role-card  { padding: 24px 12px 20px; }
-  .role-card-icon  { font-size: 2.4rem; }
-  .role-card-title { font-size: 1.25rem; }
-  .role-card-desc  { font-size: 0.72rem; }
-
-  .brand { font-size: 0.95rem; }
-  .user-chip span { display: none; }
-  
-  .stats { gap: 6px; }
-  .stat-card { padding: 10px 4px 8px; }
-  .stat-val { font-size: 1.2rem; }
-  .stat-icon { font-size: 1rem; }
-  .stat-lbl { font-size: 0.6rem; }
-}
-
-/* ── Standard phones (< 480px) ───────────────────────────────── */
-@media (max-width: 480px) {
-  body {
-    background-size: 360px 360px, 360px 360px, 360px 360px, 100% 100%, 100% 100%, 100% 100%;
-  }
-
-  .app { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-
-  /* Role screen */
-  .role-brand  { font-size: 2.1rem; }
-  .role-diya   { font-size: 3.4rem; }
-  .role-cards  { gap: 12px; }
-  .role-card   { padding: 26px 14px 22px; border-radius: var(--radius-lg); }
-  .role-card-icon  { font-size: 2.6rem; }
-  .role-card-title { font-size: 1.3rem; }
-  .role-card-desc  { font-size: 0.74rem; }
-  .role-card-arrow { font-size: 0.74rem; padding: 5px 12px; }
-
-  /* Login / Username card */
-  .card         { border-radius: var(--radius-lg); }
-  .login-header { padding: 28px 22px 22px; }
-  .login-emoji  { font-size: 2.6rem; }
-  .login-title  { font-size: 1.7rem; }
-  .login-body   { padding: 24px 20px 20px; }
-
-  /* Game */
-  .topbar { padding: 10px 14px; border-radius: var(--radius-md); }
-  .brand  { font-size: 1.05rem; }
-  .user-chip span { font-size: 0.78rem; }
-  .lb-btn { font-size: 0.74rem; padding: 5px 9px; }
-
-  .stats { gap: 8px; }
-  .stat-card { padding: 11px 6px 9px; }
-  .stat-val  { font-size: 1.25rem; }
-  .stat-icon { font-size: 1.1rem; }
-
-  .q-card    { padding: 20px 16px 18px; }
-  .clue-text { font-size: 1.02rem; }
-
-  /* Stack submit button below input on small screens */
-  .input-row  { flex-direction: column; }
-  .submit-btn { width: 100%; }
-
-  .clue-btns { flex-direction: column; }
-  .clue-btn { min-width: auto; }
-  .skip-btn { min-width: auto; }
-
-  .lb-card  { max-height: 90vh; max-height: 90dvh; }
-  .lb-title { font-size: 1.2rem; }
-  .lb-row   { padding: 10px 12px; gap: 8px; }
-  .lb-name  { font-size: 0.88rem; }
-  .lb-date  { display: none; } /* hide date on very small screens */
-  
-  .gameover-extras { gap: 8px; }
-  .extra-stat { padding: 6px 10px; font-size: 0.75rem; }
-}
-
-/* ── Landscape phones ─────────────────────────────────────────── */
-@media (max-height: 500px) and (orientation: landscape) {
-  .app { justify-content: flex-start; padding-top: 10px; }
-
-  .role-header { margin-bottom: 14px; }
-  .role-diya   { font-size: 2.4rem; margin-bottom: 6px; }
-  .role-brand  { font-size: 1.8rem; }
-  .role-divider { margin: 10px auto 8px; }
-  .role-prompt { font-size: 0.95rem; }
-  .role-cards  { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .role-card   { padding: 18px 14px 16px; flex-direction: row; align-items: center; text-align: left; gap: 12px; }
-  .role-card-icon  { font-size: 2rem; flex-shrink: 0; }
-  .role-card-desc  { display: none; }
-  .role-footer { margin-top: 12px; }
-
-  .login-header { padding: 18px 22px 14px; }
-  .login-emoji  { font-size: 2rem; margin-bottom: 6px; }
-  .login-title  { font-size: 1.5rem; }
-  .login-body   { padding: 18px 20px 16px; gap: 12px; }
-
-  .game-wrap { gap: 10px; }
-  .stats { gap: 8px; }
-  .stat-card { padding: 8px 6px; }
-  .stat-val  { font-size: 1.2rem; }
-  .q-card { padding: 16px 16px 14px; }
-}
-
-/* ── Tablets (768px+) ─────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .role-brand  { font-size: 3rem; }
-  .role-diya   { font-size: 4.5rem; }
-  .role-cards  { gap: 20px; max-width: 520px; margin: 0 auto; }
-  .role-card   { padding: 36px 24px 32px; }
-  .role-card-icon  { font-size: 3.5rem; }
-  .role-card-title { font-size: 1.65rem; }
-  .role-card-desc  { font-size: 0.84rem; }
-
-  .game-wrap { gap: 18px; }
-  .q-card    { padding: 30px 30px 28px; }
-  .clue-text { font-size: 1.22rem; }
-
-  .input-row  { flex-direction: row; }
-  .submit-btn { width: auto; }
-  .clue-btns  { flex-direction: row; }
-}
-
-/* ── Large screens / Desktop (1024px+) ────────────────────────── */
-@media (min-width: 1024px) {
-  .role-brand { font-size: 3.4rem; }
-  .role-card  { padding: 40px 28px 36px; }
-  .role-card-icon { font-size: 4rem; }
-
-  .game-wrap { max-width: 620px; gap: 20px; }
-  .q-card    { padding: 34px 32px 30px; }
-  .clue-text { font-size: 1.26rem; }
-}
-
-/* ── Selection & Focus States ─────────────────────────────────── */
-::selection {
-  background-color: var(--saffron);
-  color: var(--cream);
-}
-
-*:focus-visible {
-  outline: 2px solid var(--saffron);
-  outline-offset: 2px;
-}
-
-/* ── Scrollbar styling ─────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(253, 243, 227, 0.8);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gold);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--saffron);
 }
