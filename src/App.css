@@ -1,3 +1,4 @@
+
 /*
  * ══════════════════════════════════════════════════════════════════
  *  MASALA MAHAL — Authentic Indian Traditional Food Quiz
@@ -329,6 +330,36 @@ body {
   color: rgba(92,48,16,0.45);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INSTALL APP BUTTON (PWA)
+══════════════════════════════════════════════════════════════ */
+.install-btn {
+  margin-top: 20px;
+  padding: 14px 28px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-light) 100%);
+  border: 2px solid var(--emerald);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(26,92,58,0.3);
+  transition: transform 0.18s, box-shadow 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.install-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(26,92,58,0.4);
+}
+
+.install-btn:active {
+  transform: translateY(0);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1493,6 +1524,8 @@ body {
   .stat-val { font-size: 1.2rem; }
   .stat-icon { font-size: 1rem; }
   .stat-lbl { font-size: 0.6rem; }
+  
+  .install-btn { font-size: 0.9rem; padding: 12px 20px; }
 }
 
 /* ── Standard phones (< 480px) ───────────────────────────────── */
@@ -1555,6 +1588,8 @@ body {
   
   .gameover-extras { gap: 8px; }
   .extra-stat { padding: 6px 10px; font-size: 0.75rem; }
+  
+  .install-btn { width: 100%; }
 }
 
 /* ── Landscape phones ─────────────────────────────────────────── */
