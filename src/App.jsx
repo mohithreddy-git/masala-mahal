@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect, useCallback } from "react";
 import "./App.css";
 
@@ -105,12 +104,57 @@ export default function App() {
   const [flash, setFlash] = useState(null);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  
+  // PWA Install States
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+  
   const { currentFood, getNextFood, resetGame } = useGame();
 
   useEffect(() => {
     const saved = localStorage.getItem("masalaLeaderboard");
     if (saved) setLeaderboard(JSON.parse(saved));
+    
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.log('SW registration failed:', error);
+        });
+    }
+    
+    // Capture the install prompt
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallBtn(false);
+    }
+    
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
+
+  // Handle install button click
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setShowInstallBtn(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   const startQuestion = useCallback(() => {
     getNextFood();
@@ -291,6 +335,13 @@ export default function App() {
               <div className="role-card-arrow">Login →</div>
             </button>
           </div>
+
+          {/* Install App Button */}
+          {showInstallBtn && (
+            <button className="install-btn" onClick={handleInstallClick}>
+              📲 Install App
+            </button>
+          )}
 
           <div className="role-footer">Indian Studies</div>
         </div>
