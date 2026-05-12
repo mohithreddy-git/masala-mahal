@@ -119,6 +119,7 @@ body {
 /* ── Flash states ─────────────────────────────────────────────── */
 .app.flash-correct { animation: flashCorrect 0.7s ease; }
 .app.flash-wrong   { animation: flashWrong 0.7s ease; }
+.app.flash-skip    { animation: flashSaffron 0.7s ease-in-out; }
 
 @keyframes flashCorrect {
   0%, 100% { background-color: transparent; }
@@ -127,6 +128,10 @@ body {
 @keyframes flashWrong {
   0%, 100% { background-color: transparent; }
   35%      { background-color: rgba(107,26,26,0.11); }
+}
+@keyframes flashSaffron {
+  0%, 100% { background-color: transparent; }
+  35%      { background-color: rgba(232,133,10,0.12); }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -198,7 +203,7 @@ body {
   font-family: var(--font-display);
   font-size: 1.15rem;
   color: var(--ink-mid);
-  font-style: bold;
+  font-style: italic;
 }
 
 /* Role Cards Grid */
@@ -608,14 +613,14 @@ body {
 .lb-btn:hover { background: rgba(245,217,139,0.28); transform: translateY(-1px); }
 
 /* ── Stats Row ────────────────────────────────────────────────── */
-.stats { display: flex; gap: 12px; }
+.stats { display: flex; gap: 10px; }
 
 .stat-card {
   flex: 1;
   background: var(--white);
   border: var(--border-gold);
   border-radius: var(--radius-md);
-  padding: 14px 10px 10px;
+  padding: 12px 8px 10px;
   text-align: center;
   box-shadow: var(--shadow-card);
   transition: transform 0.2s;
@@ -623,11 +628,11 @@ body {
 
 .stat-card:hover { transform: translateY(-2px); }
 
-.stat-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+.stat-icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
 
 .stat-val {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--maroon);
   line-height: 1;
@@ -635,7 +640,7 @@ body {
 
 .stat-lbl {
   font-family: var(--font-ui);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--ink-mid);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -708,7 +713,7 @@ body {
 .clue-text {
   font-family: var(--font-display);
   font-size: 1.18rem;
-  font-style: bold;
+  font-weight: bold;
   color: var(--ink);
   line-height: 1.65;
   padding: 14px 18px;
@@ -796,10 +801,11 @@ body {
 .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Clue Buttons ─────────────────────────────────────────────── */
-.clue-btns { display: flex; gap: 10px; }
+.clue-btns { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .clue-btn {
   flex: 1;
+  min-width: 120px;
   padding: 12px 14px;
   font-family: var(--font-ui);
   font-size: 0.85rem;
@@ -826,13 +832,45 @@ body {
   box-shadow: 0 5px 18px rgba(232,133,10,0.38);
 }
 
-.clue-btn.used {
+.clue-btn.used,
+.clue-btn.locked {
   color: rgba(92,48,16,0.45);
   background: var(--cream);
   border-color: var(--cream-dark);
   cursor: not-allowed;
   opacity: 0.65;
 }
+
+/* ── Skip Button ─────────────────────────────────────────────── */
+.skip-btn {
+  padding: 14px 22px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--mustard) 100%);
+  border: 2px solid var(--mustard);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(232,133,10,0.28);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  letter-spacing: 0.03em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 48px;
+  flex: 1;
+  max-width: 110px;
+}
+
+.skip-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212,160,23,0.35);
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--mustard) 100%);
+}
+
+.skip-btn:active:not(:disabled) { transform: translateY(0); }
+.skip-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Result Block ─────────────────────────────────────────────── */
 .result-block {
@@ -857,6 +895,11 @@ body {
   border: 2px solid var(--maroon);
 }
 
+.result-block.skip {
+  background: linear-gradient(135deg, rgba(212,160,23,0.08) 0%, rgba(232,133,10,0.12) 100%);
+  border: 2px solid var(--saffron-light);
+}
+
 .result-verdict {
   font-family: var(--font-display);
   font-size: 1.35rem;
@@ -866,6 +909,7 @@ body {
 
 .result-block.correct .result-verdict { color: var(--emerald); }
 .result-block.wrong .result-verdict   { color: var(--maroon); }
+.result-block.skip .result-verdict    { color: var(--saffron); }
 
 .result-answer {
   font-family: var(--font-body);
@@ -883,6 +927,25 @@ body {
   font-weight: 700;
   color: var(--saffron);
   letter-spacing: 0.02em;
+}
+
+.skip-pts {
+  color: var(--saffron) !important;
+  font-weight: 700;
+}
+
+.streak-bonus {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--emerald);
+  animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 /* ── Next Button ──────────────────────────────────────────────── */
@@ -1097,133 +1160,6 @@ body {
 }
 
 .lb-foot strong { color: var(--maroon); }
-
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE FIRST
-══════════════════════════════════════════════════════════════ */
-
-/* ── Very small phones (< 360px) ─────────────────────────────── */
-@media (max-width: 359px) {
-  .role-brand { font-size: 2rem; }
-  .role-diya  { font-size: 3rem; }
-  .role-cards { gap: 10px; }
-  .role-card  { padding: 24px 12px 20px; }
-  .role-card-icon  { font-size: 2.4rem; }
-  .role-card-title { font-size: 1.25rem; }
-  .role-card-desc  { font-size: 0.72rem; }
-
-  .brand { font-size: 0.95rem; }
-  .user-chip span { display: none; }
-}
-
-/* ── Standard phones (< 480px) ───────────────────────────────── */
-@media (max-width: 480px) {
-  body {
-    background-size: 360px 360px, 360px 360px, 360px 360px, 100% 100%, 100% 100%, 100% 100%;
-  }
-
-  .app { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-
-  /* Role screen */
-  .role-brand  { font-size: 2.1rem; }
-  .role-diya   { font-size: 3.4rem; }
-  .role-cards  { gap: 12px; }
-  .role-card   { padding: 26px 14px 22px; border-radius: var(--radius-lg); }
-  .role-card-icon  { font-size: 2.6rem; }
-  .role-card-title { font-size: 1.3rem; }
-  .role-card-desc  { font-size: 0.74rem; }
-  .role-card-arrow { font-size: 0.74rem; padding: 5px 12px; }
-
-  /* Login / Username card */
-  .card         { border-radius: var(--radius-lg); }
-  .login-header { padding: 28px 22px 22px; }
-  .login-emoji  { font-size: 2.6rem; }
-  .login-title  { font-size: 1.7rem; }
-  .login-body   { padding: 24px 20px 20px; }
-
-  /* Game */
-  .topbar { padding: 10px 14px; border-radius: var(--radius-md); }
-  .brand  { font-size: 1.05rem; }
-  .user-chip span { font-size: 0.78rem; }
-  .lb-btn { font-size: 0.74rem; padding: 5px 9px; }
-
-  .stats { gap: 8px; }
-  .stat-card { padding: 11px 6px 9px; }
-  .stat-val  { font-size: 1.35rem; }
-  .stat-icon { font-size: 1.2rem; }
-
-  .q-card    { padding: 20px 16px 18px; }
-  .clue-text { font-size: 1.02rem; }
-
-  /* Stack submit button below input on small screens */
-  .input-row  { flex-direction: column; }
-  .submit-btn { width: 100%; }
-
-  .clue-btns { flex-direction: column; }
-
-  .lb-card  { max-height: 90vh; max-height: 90dvh; }
-  .lb-title { font-size: 1.2rem; }
-  .lb-row   { padding: 10px 12px; gap: 8px; }
-  .lb-name  { font-size: 0.88rem; }
-  .lb-date  { display: none; } /* hide date on very small screens */
-}
-
-/* ── Landscape phones ─────────────────────────────────────────── */
-@media (max-height: 500px) and (orientation: landscape) {
-  .app { justify-content: flex-start; padding-top: 10px; }
-
-  .role-header { margin-bottom: 14px; }
-  .role-diya   { font-size: 2.4rem; margin-bottom: 6px; }
-  .role-brand  { font-size: 1.8rem; }
-  .role-divider { margin: 10px auto 8px; }
-  .role-prompt { font-size: 0.95rem; }
-  .role-cards  { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .role-card   { padding: 18px 14px 16px; flex-direction: row; align-items: center; text-align: left; gap: 12px; }
-  .role-card-icon  { font-size: 2rem; flex-shrink: 0; }
-  .role-card-desc  { display: none; }
-  .role-footer { margin-top: 12px; }
-
-  .login-header { padding: 18px 22px 14px; }
-  .login-emoji  { font-size: 2rem; margin-bottom: 6px; }
-  .login-title  { font-size: 1.5rem; }
-  .login-body   { padding: 18px 20px 16px; gap: 12px; }
-
-  .game-wrap { gap: 10px; }
-  .stats { gap: 8px; }
-  .stat-card { padding: 8px 6px; }
-  .stat-val  { font-size: 1.2rem; }
-  .q-card { padding: 16px 16px 14px; }
-}
-
-/* ── Tablets (768px+) ─────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .role-brand  { font-size: 3rem; }
-  .role-diya   { font-size: 4.5rem; }
-  .role-cards  { gap: 20px; max-width: 520px; margin: 0 auto; }
-  .role-card   { padding: 36px 24px 32px; }
-  .role-card-icon  { font-size: 3.5rem; }
-  .role-card-title { font-size: 1.65rem; }
-  .role-card-desc  { font-size: 0.84rem; }
-
-  .game-wrap { gap: 18px; }
-  .q-card    { padding: 30px 30px 28px; }
-  .clue-text { font-size: 1.22rem; }
-
-  .input-row  { flex-direction: row; }
-  .submit-btn { width: auto; }
-  .clue-btns  { flex-direction: row; }
-}
-
-/* ── Large screens / Desktop (1024px+) ────────────────────────── */
-@media (min-width: 1024px) {
-  .role-brand { font-size: 3.4rem; }
-  .role-card  { padding: 40px 28px 36px; }
-  .role-card-icon { font-size: 4rem; }
-
-  .game-wrap { max-width: 620px; gap: 20px; }
-  .q-card    { padding: 34px 32px 30px; }
-  .clue-text { font-size: 1.26rem; }
-}
 
 /* ══════════════════════════════════════════════════════════════
    PROGRESS BAR
@@ -1446,6 +1382,40 @@ body {
   margin: 0 4px;
 }
 
+/* ── Game Over Extra Stats ─────────────────────────────────────── */
+.gameover-extras {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.extra-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--cream);
+  border: 1px solid var(--cream-dark);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+}
+
+.extra-stat-icon {
+  font-size: 1rem;
+}
+
+.extra-stat-label {
+  color: var(--ink-mid);
+  font-weight: 500;
+}
+
+.extra-stat-val {
+  color: var(--maroon);
+  font-weight: 700;
+}
+
 .gameover-actions {
   display: flex;
   flex-direction: column;
@@ -1501,15 +1471,174 @@ body {
 
 .btn-ghost:active { transform: scale(0.98); }
 
-/* ── Mobile adjustments for new elements ────────────────────── */
-@media (max-width: 480px) {
-  .progress-dot { width: 8px; height: 8px; gap: 4px; }
-  .progress-dots { gap: 4px; }
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE FIRST
+══════════════════════════════════════════════════════════════ */
 
-  .gameover-top    { padding: 28px 18px 24px; }
-  .gameover-title  { font-size: 1.65rem; }
-  .gameover-emoji  { font-size: 3rem; }
-  .gameover-body   { padding: 22px 18px 20px; gap: 16px; }
-  .go-stat-val     { font-size: 1.5rem; }
-  .go-stat-rank    { font-size: 1rem; }
+/* ── Very small phones (< 360px) ─────────────────────────────── */
+@media (max-width: 359px) {
+  .role-brand { font-size: 2rem; }
+  .role-diya  { font-size: 3rem; }
+  .role-cards { gap: 10px; }
+  .role-card  { padding: 24px 12px 20px; }
+  .role-card-icon  { font-size: 2.4rem; }
+  .role-card-title { font-size: 1.25rem; }
+  .role-card-desc  { font-size: 0.72rem; }
+
+  .brand { font-size: 0.95rem; }
+  .user-chip span { display: none; }
+  
+  .stats { gap: 6px; }
+  .stat-card { padding: 10px 4px 8px; }
+  .stat-val { font-size: 1.2rem; }
+  .stat-icon { font-size: 1rem; }
+  .stat-lbl { font-size: 0.6rem; }
+}
+
+/* ── Standard phones (< 480px) ───────────────────────────────── */
+@media (max-width: 480px) {
+  body {
+    background-size: 360px 360px, 360px 360px, 360px 360px, 100% 100%, 100% 100%, 100% 100%;
+  }
+
+  .app { padding: 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+
+  /* Role screen */
+  .role-brand  { font-size: 2.1rem; }
+  .role-diya   { font-size: 3.4rem; }
+  .role-cards  { gap: 12px; }
+  .role-card   { padding: 26px 14px 22px; border-radius: var(--radius-lg); }
+  .role-card-icon  { font-size: 2.6rem; }
+  .role-card-title { font-size: 1.3rem; }
+  .role-card-desc  { font-size: 0.74rem; }
+  .role-card-arrow { font-size: 0.74rem; padding: 5px 12px; }
+
+  /* Login / Username card */
+  .card         { border-radius: var(--radius-lg); }
+  .login-header { padding: 28px 22px 22px; }
+  .login-emoji  { font-size: 2.6rem; }
+  .login-title  { font-size: 1.7rem; }
+  .login-body   { padding: 24px 20px 20px; }
+
+  /* Game */
+  .topbar { padding: 10px 14px; border-radius: var(--radius-md); }
+  .brand  { font-size: 1.05rem; }
+  .user-chip span { font-size: 0.78rem; }
+  .lb-btn { font-size: 0.74rem; padding: 5px 9px; }
+
+  .stats { gap: 8px; }
+  .stat-card { padding: 11px 6px 9px; }
+  .stat-val  { font-size: 1.25rem; }
+  .stat-icon { font-size: 1.1rem; }
+
+  .q-card    { padding: 20px 16px 18px; }
+  .clue-text { font-size: 1.02rem; }
+
+  /* Stack submit button below input on small screens */
+  .input-row  { flex-direction: column; }
+  .submit-btn { width: 100%; }
+
+  .clue-btns { flex-direction: column; }
+  .clue-btn { min-width: auto; }
+  
+  .skip-btn,
+  .submit-btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .lb-card  { max-height: 90vh; max-height: 90dvh; }
+  .lb-title { font-size: 1.2rem; }
+  .lb-row   { padding: 10px 12px; gap: 8px; }
+  .lb-name  { font-size: 0.88rem; }
+  .lb-date  { display: none; } /* hide date on very small screens */
+  
+  .gameover-extras { gap: 8px; }
+  .extra-stat { padding: 6px 10px; font-size: 0.75rem; }
+}
+
+/* ── Landscape phones ─────────────────────────────────────────── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app { justify-content: flex-start; padding-top: 10px; }
+
+  .role-header { margin-bottom: 14px; }
+  .role-diya   { font-size: 2.4rem; margin-bottom: 6px; }
+  .role-brand  { font-size: 1.8rem; }
+  .role-divider { margin: 10px auto 8px; }
+  .role-prompt { font-size: 0.95rem; }
+  .role-cards  { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .role-card   { padding: 18px 14px 16px; flex-direction: row; align-items: center; text-align: left; gap: 12px; }
+  .role-card-icon  { font-size: 2rem; flex-shrink: 0; }
+  .role-card-desc  { display: none; }
+  .role-footer { margin-top: 12px; }
+
+  .login-header { padding: 18px 22px 14px; }
+  .login-emoji  { font-size: 2rem; margin-bottom: 6px; }
+  .login-title  { font-size: 1.5rem; }
+  .login-body   { padding: 18px 20px 16px; gap: 12px; }
+
+  .game-wrap { gap: 10px; }
+  .stats { gap: 8px; }
+  .stat-card { padding: 8px 6px; }
+  .stat-val  { font-size: 1.2rem; }
+  .q-card { padding: 16px 16px 14px; }
+}
+
+/* ── Tablets (768px+) ─────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .role-brand  { font-size: 3rem; }
+  .role-diya   { font-size: 4.5rem; }
+  .role-cards  { gap: 20px; max-width: 520px; margin: 0 auto; }
+  .role-card   { padding: 36px 24px 32px; }
+  .role-card-icon  { font-size: 3.5rem; }
+  .role-card-title { font-size: 1.65rem; }
+  .role-card-desc  { font-size: 0.84rem; }
+
+  .game-wrap { gap: 18px; }
+  .q-card    { padding: 30px 30px 28px; }
+  .clue-text { font-size: 1.22rem; }
+
+  .input-row  { flex-direction: row; }
+  .submit-btn { width: auto; }
+  .clue-btns  { flex-direction: row; }
+}
+
+/* ── Large screens / Desktop (1024px+) ────────────────────────── */
+@media (min-width: 1024px) {
+  .role-brand { font-size: 3.4rem; }
+  .role-card  { padding: 40px 28px 36px; }
+  .role-card-icon { font-size: 4rem; }
+
+  .game-wrap { max-width: 620px; gap: 20px; }
+  .q-card    { padding: 34px 32px 30px; }
+  .clue-text { font-size: 1.26rem; }
+}
+
+/* ── Selection & Focus States ─────────────────────────────────── */
+::selection {
+  background-color: var(--saffron);
+  color: var(--cream);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--saffron);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar styling ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(253, 243, 227, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--saffron);
 }
