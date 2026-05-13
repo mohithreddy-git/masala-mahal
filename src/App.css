@@ -22,6 +22,7 @@
   --rose-light: #DCAEAE;
   --rose-dark: #801b23;
   --rose-normal: #ff007f;
+  --rose-custom: #D1BEBE
 
 
   --font-display: 'Playfair Display', Georgia, serif;
@@ -328,7 +329,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   color: var(--white);
-  background: linear-gradient(135deg, var(--rose-normal) 0%, var(--rose-normal) 100%);
+  background: linear-gradient(135deg, var(--rose-custom) 0%, var(--rose-custom) 100%);
   border: 2px solid var(--emerald);
   border-radius: var(--radius-md);
   cursor: pointer;
