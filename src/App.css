@@ -324,7 +324,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   color: var(--white);
-  background: linear-gradient(135deg, var(--lavender) 0%, var(--lavender-light) 100%);
+  background: linear-gradient(135deg, var(--sky) 0%, var(--sky-light) 100%);
   border: 2px solid var(--emerald);
   border-radius: var(--radius-md);
   cursor: pointer;
