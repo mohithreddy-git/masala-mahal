@@ -323,7 +323,7 @@ body {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--white);
+  color: var(--sky);
   background: linear-gradient(135deg, var(--sky) 0%, var(--sky-light) 100%);
   border: 2px solid var(--emerald);
   border-radius: var(--radius-md);
