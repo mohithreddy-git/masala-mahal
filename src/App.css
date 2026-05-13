@@ -1,22 +1,4 @@
 
-/*
- * ══════════════════════════════════════════════════════════════════
- *  MASALA MAHAL — Authentic Indian Traditional Food Quiz
- *  Colour Palette & Design Notes
- * ══════════════════════════════════════════════════════════════════
- *
- *  --maroon      #6B1A1A  → Deep temple-red; power, tradition, reverence
- *  --saffron     #E8850A  → Saffron robes & spice; warmth, celebration
- *  --gold        #C9942A  → Marigold garlands & gold leaf; festivity
- *  --gold-light  #F5D98B  → Turmeric-tinged highlights; soft luxury
- *  --mustard     #D4A017  → Mustard seed temper; earthy richness
- *  --emerald     #1A5C3A  → Curry-leaf green; freshness, nature
- *  --cream       #FDF3E3  → Raw cotton / basmati; clean, readable base
- *  --ink         #2A1505  → Darkest chai; legibility anchor
- * ══════════════════════════════════════════════════════════════════
- */
-
-/* ── Google Fonts ─────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Noto+Sans:wght@400;500;600&display=swap');
 
 /* ── CSS Variables ────────────────────────────────────────────── */
