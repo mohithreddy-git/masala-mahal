@@ -1,4 +1,21 @@
+/*
+ * ══════════════════════════════════════════════════════════════════
+ *  MASALA MAHAL — Authentic Indian Traditional Food Quiz
+ *  Colour Palette & Design Notes
+ * ══════════════════════════════════════════════════════════════════
+ *
+ *  --maroon      #6B1A1A  → Deep temple-red; power, tradition, reverence
+ *  --saffron     #E8850A  → Saffron robes & spice; warmth, celebration
+ *  --gold        #C9942A  → Marigold garlands & gold leaf; festivity
+ *  --gold-light  #F5D98B  → Turmeric-tinged highlights; soft luxury
+ *  --mustard     #D4A017  → Mustard seed temper; earthy richness
+ *  --emerald     #1A5C3A  → Curry-leaf green; freshness, nature
+ *  --cream       #FDF3E3  → Raw cotton / basmati; clean, readable base
+ *  --ink         #2A1505  → Darkest chai; legibility anchor
+ * ══════════════════════════════════════════════════════════════════
+ */
 
+/* ── Google Fonts ─────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Noto+Sans:wght@400;500;600&display=swap');
 
 /* ── CSS Variables ────────────────────────────────────────────── */
@@ -19,12 +36,6 @@
   --ink:           #2A1505;
   --ink-mid:       #5C3010;
   --white:         #FFFDF9;
-  --rose-light: #DCAEAE;
-  --rose-dark: #801b23;
-  --rose-normal: #ff007f;
-  --rose-custom: #D1BEBE;
-  --text-navy: #1b263b;
-
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body:    'Lora', Georgia, serif;
@@ -192,7 +203,7 @@ body {
   font-family: var(--font-display);
   font-size: 1.15rem;
   color: var(--ink-mid);
-  font-style: bold;
+  font-style: italic;
 }
 
 /* Role Cards Grid */
@@ -324,21 +335,175 @@ body {
    INSTALL APP BUTTON (PWA)
 ══════════════════════════════════════════════════════════════ */
 .install-btn {
-  margin-top: 20px;
-  padding: 14px 28px;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--text-navy) 0%, var(--text-navy) 100%);
-  border: 2px solid var(--emerald);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(26,92,58,0.3);
-  transition: transform 0.18s, box-shadow 0.18s;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  animation: pulse 2s ease-in-out infinite;
+  background: linear-gradient(-30deg, #0b1b3d 50%, #08142b 50%);
+  padding: 20px 40px;
+  margin: 12px;
+  display: inline-block;
+  position: relative;
+  -webkit-transform: translate(0%, 0%);
+          transform: translate(0%, 0%);
+  overflow: hidden;
+  color: #d4e0f7;
+  font-size: 20px;
+  letter-spacing: 2.5px;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  -webkit-box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.animated-button::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: #8592ad;
+  opacity: 0;
+  -webkit-transition: .2s opacity ease-in-out;
+  transition: .2s opacity ease-in-out;
+}
+
+.animated-button:hover::before {
+  opacity: 0.2;
+}
+
+.animated-button span {
+  position: absolute;
+}
+
+.animated-button span:nth-child(1) {
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 2px;
+  background: -webkit-gradient(linear, right top, left top, from(rgba(8, 20, 43, 0)), to(#2662d9));
+  background: linear-gradient(to left, rgba(8, 20, 43, 0), #2662d9);
+  -webkit-animation: 2s animateTop linear infinite;
+          animation: 2s animateTop linear infinite;
+}
+
+@-webkit-keyframes animateTop {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%);
+  }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+}
+
+@keyframes animateTop {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%);
+  }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+}
+
+.animated-button span:nth-child(2) {
+  top: 0px;
+  right: 0px;
+  height: 100%;
+  width: 2px;
+  background: -webkit-gradient(linear, left bottom, left top, from(rgba(8, 20, 43, 0)), to(#2662d9));
+  background: linear-gradient(to top, rgba(8, 20, 43, 0), #2662d9);
+  -webkit-animation: 2s animateRight linear -1s infinite;
+          animation: 2s animateRight linear -1s infinite;
+}
+
+@-webkit-keyframes animateRight {
+  0% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+  }
+  100% {
+    -webkit-transform: translateY(-100%);
+            transform: translateY(-100%);
+  }
+}
+
+@keyframes animateRight {
+  0% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+  }
+  100% {
+    -webkit-transform: translateY(-100%);
+            transform: translateY(-100%);
+  }
+}
+
+.animated-button span:nth-child(3) {
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  height: 2px;
+  background: -webkit-gradient(linear, left top, right top, from(rgba(8, 20, 43, 0)), to(#2662d9));
+  background: linear-gradient(to right, rgba(8, 20, 43, 0), #2662d9);
+  -webkit-animation: 2s animateBottom linear infinite;
+          animation: 2s animateBottom linear infinite;
+}
+
+@-webkit-keyframes animateBottom {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%);
+  }
+}
+
+@keyframes animateBottom {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%);
+  }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%);
+  }
+}
+
+.animated-button span:nth-child(4) {
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 2px;
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(8, 20, 43, 0)), to(#2662d9));
+  background: linear-gradient(to bottom, rgba(8, 20, 43, 0), #2662d9);
+  -webkit-animation: 2s animateLeft linear -1s infinite;
+          animation: 2s animateLeft linear -1s infinite;
+}
+
+@-webkit-keyframes animateLeft {
+  0% {
+    -webkit-transform: translateY(-100%);
+            transform: translateY(-100%);
+  }
+  100% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+  }
+}
+
+@keyframes animateLeft {
+  0% {
+    -webkit-transform: translateY(-100%);
+            transform: translateY(-100%);
+  }
+  100% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+  }
 }
 
 .install-btn:hover {

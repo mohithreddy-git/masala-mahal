@@ -338,7 +338,11 @@ export default function App() {
 
           {/* Install App Button */}
           {showInstallBtn && (
-            <button className="install-btn" onClick={handleInstallClick}>
+            <button className="install-btn animated-button" onClick={handleInstallClick}>
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
               📲 Install App
             </button>
           )}
